@@ -1,15 +1,14 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:medmind/core/enum/enum_collection.dart';
 
-class HealthScore {
-  final DateTime date;
-  final double overallScore; // 0-100
-  final Map<String, double> components; // breakdown per category
-  final ScoreTrend trend;
+part 'health_score.freezed.dart';
 
-  HealthScore({
-    required this.date,
-    required this.overallScore,
-    required this.components,
-    required this.trend,
-  });
+@freezed
+abstract class HealthScore with _$HealthScore {
+  const factory HealthScore({
+    required DateTime date,
+    required double overallScore, // 0-100
+    required Map<String, double> components, // breakdown per category
+    required ScoreTrend trend,
+  }) = _HealthScore;
 }

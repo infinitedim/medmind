@@ -1,29 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class Medication {
-  final String id;
-  final String name;
-  final String? dosage;
-  final String? frequency;
+part 'medication.freezed.dart';
 
-  Medication({
-    required this.id,
-    required this.name,
-    this.dosage,
-    this.frequency,
-  });
+@freezed
+abstract class Medication with _$Medication {
+  const factory Medication({
+    required String id,
+    required String name,
+    String? dosage,
+    String? frequency,
+  }) = _Medication;
 }
 
-class MedicationLog {
-  final String medicationId;
-  final bool taken;
-  final TimeOfDay? time;
-  final String? dosage;
-
-  MedicationLog({
-    required this.medicationId,
-    required this.taken,
-    this.time,
-    this.dosage,
-  });
+@freezed
+abstract class MedicationLog with _$MedicationLog {
+  const factory MedicationLog({
+    required String medicationId,
+    required bool taken,
+    TimeOfDay? time,
+    String? dosage,
+  }) = _MedicationLog;
 }

@@ -1,25 +1,19 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:medmind/core/enum/enum_collection.dart';
 
-class Insight {
-  final String id;
-  final InsightType type;
-  final String title;
-  final String description;
-  final double confidence;
-  final List<String> relatedVariables;
-  final DateTime generatedAt;
-  bool isRead;
-  bool isSaved;
+part 'insight.freezed.dart';
 
-  Insight({
-    required this.id,
-    required this.type,
-    required this.title,
-    required this.description,
-    required this.confidence,
-    required this.relatedVariables,
-    required this.generatedAt,
-    this.isRead = false,
-    this.isSaved = false,
-  });
+@freezed
+abstract class Insight with _$Insight {
+  const factory Insight({
+    required String id,
+    required InsightType type,
+    required String title,
+    required String description,
+    required double confidence,
+    required List<String> relatedVariables,
+    required DateTime generatedAt,
+    @Default(false) bool isRead,
+    @Default(false) bool isSaved,
+  }) = _Insight;
 }

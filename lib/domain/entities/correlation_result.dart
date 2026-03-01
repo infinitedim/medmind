@@ -1,19 +1,16 @@
-class CorrelationResult {
-  final String variableA;
-  final String variableB;
-  final double correlationCoefficient; // -1.0 to 1.0
-  final double pValue;
-  final int sampleSize;
-  final int lag; // 0 = same day, 1 = next day, etc.
-  final bool isSignificant; // p < 0.05 after Bonferroni correction
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  CorrelationResult({
-    required this.variableA,
-    required this.variableB,
-    required this.correlationCoefficient,
-    required this.pValue,
-    required this.sampleSize,
-    required this.lag,
-    required this.isSignificant,
-  });
+part 'correlation_result.freezed.dart';
+
+@freezed
+abstract class CorrelationResult with _$CorrelationResult {
+  const factory CorrelationResult({
+    required String variableA,
+    required String variableB,
+    required double correlationCoefficient, // -1.0 to 1.0
+    required double pValue,
+    required int sampleSize,
+    required int lag, // 0 = same day, 1 = next day, etc.
+    required bool isSignificant, // p < 0.05 after Bonferroni correction
+  }) = _CorrelationResult;
 }

@@ -1,50 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:medmind/core/enum/enum_collection.dart';
 
-class Symptom {
-  final String id;
-  final String name;
-  final SymptomCategory category;
-  final String icon;
-  final bool isCustom;
+part 'symptom.freezed.dart';
 
-  Symptom({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.icon,
-    this.isCustom = false,
-  });
+@freezed
+abstract class Symptom with _$Symptom {
+  const factory Symptom({
+    required String id,
+    required String name,
+    required SymptomCategory category,
+    required String icon,
+    @Default(false) bool isCustom,
+  }) = _Symptom;
 }
 
-class SymptomLog {
-  final String symptomId;
-  final int severity; // 1-10
-  final TimeOfDay? onset; // kapan mulai
-  final Duration? duration; // berapa lama
-  final String? notes;
-
-  SymptomLog({
-    required this.symptomId,
-    required this.severity,
-    this.onset,
-    this.duration,
-    this.notes,
-  });
+@freezed
+abstract class SymptomLog with _$SymptomLog {
+  const factory SymptomLog({
+    required String symptomId,
+    required int severity, // 1-10
+    TimeOfDay? onset, // kapan mulai
+    Duration? duration, // berapa lama
+    String? notes,
+  }) = _SymptomLog;
 }
 
-class ExtractedSymptom {
-  final String symptomName;
-  final String? severity; // mild, moderate, severe
-  final double confidence; // 0.0 - 1.0
-  final String sourceText; // potongan teks yang di-extract
-  final bool? isConfirmedByUser;
-
-  ExtractedSymptom({
-    required this.symptomName,
-    this.severity,
-    required this.confidence,
-    required this.sourceText,
-    this.isConfirmedByUser,
-  });
+@freezed
+abstract class ExtractedSymptom with _$ExtractedSymptom {
+  const factory ExtractedSymptom({
+    required String symptomName,
+    String? severity, // mild, moderate, severe
+    required double confidence, // 0.0 - 1.0
+    required String sourceText, // potongan teks yang di-extract
+    bool? isConfirmedByUser,
+  }) = _ExtractedSymptom;
 }

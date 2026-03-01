@@ -1,15 +1,17 @@
-class SleepRecord {
-  final DateTime bedTime;
-  final DateTime wakeTime;
-  final int quality; // 1-10
-  final int? disturbances; // berapa kali terbangun
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  SleepRecord({
-    required this.bedTime,
-    required this.wakeTime,
-    required this.quality,
-    this.disturbances,
-  });
+part 'sleep_record.freezed.dart';
+
+@freezed
+abstract class SleepRecord with _$SleepRecord {
+  const SleepRecord._();
+
+  const factory SleepRecord({
+    required DateTime bedTime,
+    required DateTime wakeTime,
+    required int quality, // 1-10
+    int? disturbances, // berapa kali terbangun
+  }) = _SleepRecord;
 
   Duration get duration => wakeTime.difference(bedTime);
 }
