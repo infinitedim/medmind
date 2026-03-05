@@ -17,8 +17,8 @@ abstract class LifestyleFactor with _$LifestyleFactor {
 abstract class LifestyleFactorLog with _$LifestyleFactorLog {
   const factory LifestyleFactorLog({
     required String factorId,
-    bool? boolValue, // untuk tipe boolean: "Consumed caffeine?"
-    double? numericValue, // untuk tipe numeric: "3 cups"
-    int? scaleValue, // untuk tipe scale: 1-10
+    bool? boolValue,
+    double? numericValue,
+    int? scaleValue,
   }) = _LifestyleFactorLog;
 }

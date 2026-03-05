@@ -9,8 +9,6 @@ class CreateJournalEntry {
   CreateJournalEntry(this._repository);
 
   Future<Either<Failure, JournalEntry>> call(JournalEntry entry) {
-    // Validasi bisnis bisa ditaruh di sini
-    // contoh: pastikan date tidak di masa depan
     return _repository.createEntry(entry);
   }
 }

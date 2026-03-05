@@ -5,7 +5,6 @@ import 'package:medmind/app/routes/route_names.dart';
 import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
 
-/// Shell scaffold that wraps all main-tab pages with a bottom navigation bar.
 class AppShell extends StatelessWidget {
   const AppShell({required this.child, required this.state, super.key});
 
@@ -53,10 +52,6 @@ class AppShell extends StatelessWidget {
     );
   }
 }
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Bottom Nav Bar
-// ──────────────────────────────────────────────────────────────────────────────
 
 class _MedMindBottomNav extends StatelessWidget {
   const _MedMindBottomNav({
@@ -119,7 +114,6 @@ class _NavItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Icon with subtle indicator pill
           Container(
             width: 36,
             height: 28,
@@ -147,8 +141,6 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-
-// ──────────────────────────────────────────────────────────────────────────────
 
 class _TabItem {
   const _TabItem({required this.label, required this.icon, required this.path});

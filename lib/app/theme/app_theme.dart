@@ -3,10 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
 
-/// MedMind Design System — Theme
-///
-/// Dark-first. All component themes follow the zinc/teal palette
-/// defined in [AppColors] and typography from [AppTypography].
 abstract final class AppTheme {
   static const ColorScheme _colorScheme = ColorScheme(
     brightness: Brightness.dark,

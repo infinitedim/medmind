@@ -7,8 +7,8 @@ part 'health_score.freezed.dart';
 abstract class HealthScore with _$HealthScore {
   const factory HealthScore({
     required DateTime date,
-    required double overallScore, // 0-100
-    required Map<String, double> components, // breakdown per category
+    required double overallScore,
+    required Map<String, double> components,
     required ScoreTrend trend,
   }) = _HealthScore;
 }

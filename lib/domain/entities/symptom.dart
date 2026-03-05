@@ -19,9 +19,9 @@ abstract class Symptom with _$Symptom {
 abstract class SymptomLog with _$SymptomLog {
   const factory SymptomLog({
     required String symptomId,
-    required int severity, // 1-10
-    TimeOfDay? onset, // kapan mulai
-    Duration? duration, // berapa lama
+    required int severity,
+    TimeOfDay? onset,
+    Duration? duration,
     String? notes,
   }) = _SymptomLog;
 }
@@ -30,9 +30,9 @@ abstract class SymptomLog with _$SymptomLog {
 abstract class ExtractedSymptom with _$ExtractedSymptom {
   const factory ExtractedSymptom({
     required String symptomName,
-    String? severity, // mild, moderate, severe
-    required double confidence, // 0.0 - 1.0
-    required String sourceText, // potongan teks yang di-extract
+    String? severity,
+    required double confidence,
+    required String sourceText,
     bool? isConfirmedByUser,
   }) = _ExtractedSymptom;
 }

@@ -9,8 +9,8 @@ abstract class SleepRecord with _$SleepRecord {
   const factory SleepRecord({
     required DateTime bedTime,
     required DateTime wakeTime,
-    required int quality, // 1-10
-    int? disturbances, // berapa kali terbangun
+    required int quality,
+    int? disturbances,
   }) = _SleepRecord;
 
   Duration get duration => wakeTime.difference(bedTime);

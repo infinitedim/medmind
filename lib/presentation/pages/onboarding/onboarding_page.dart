@@ -19,7 +19,6 @@ class OnboardingPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // Logo
               Container(
                 width: 80,
                 height: 80,
@@ -49,7 +48,6 @@ class OnboardingPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              // Feature pills
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -64,7 +62,6 @@ class OnboardingPage extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              // CTA
               SizedBox(
                 width: double.infinity,
                 height: 48,
