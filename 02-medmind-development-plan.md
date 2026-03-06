@@ -2,20 +2,24 @@
 
 > Dokumen ini adalah panduan langkah-demi-langkah untuk membangun MedMind dari nol sampai siap rilis di Play Store.
 > Ditulis untuk developer yang akan mengerjakan sendiri (solo dev).
+>
+> **Terakhir diperbarui:** 6 Maret 2026
+> **Status Keseluruhan:** ~30-35% complete — Domain layer selesai, arsitektur & routing siap, tapi Data layer dan sebagian besar Presentation layer belum diimplementasi.
 
 ---
 
 ## Daftar Isi
 
 1. [Gambaran Arsitektur & Struktur Folder](#1-gambaran-arsitektur--struktur-folder)
-2. [Phase 1: Foundation (Minggu 1–2)](#phase-1-foundation-minggu-12)
-3. [Phase 2: Smart Journaling (Minggu 3–4)](#phase-2-smart-journaling-minggu-34)
-4. [Phase 3: Statistical Engine (Minggu 5–6)](#phase-3-statistical-engine-minggu-56)
-5. [Phase 4: ML Integration (Minggu 7–9)](#phase-4-ml-integration-minggu-79)
-6. [Phase 5: Visualization & Polish (Minggu 10–11)](#phase-5-visualization--polish-minggu-1011)
-7. [Phase 6: Production (Minggu 12)](#phase-6-production-minggu-12)
+2. [Phase 1: Foundation (Minggu 1–2)](#phase-1-foundation-minggu-12) — 🟡 ~60% selesai
+3. [Phase 2: Smart Journaling (Minggu 3–4)](#phase-2-smart-journaling-minggu-34) — ❌ Belum dimulai
+4. [Phase 3: Statistical Engine (Minggu 5–6)](#phase-3-statistical-engine-minggu-56) — ❌ Belum dimulai
+5. [Phase 4: ML Integration (Minggu 7–9)](#phase-4-ml-integration-minggu-79) — ❌ Belum dimulai
+6. [Phase 5: Visualization & Polish (Minggu 10–11)](#phase-5-visualization--polish-minggu-1011) — ❌ Belum dimulai
+7. [Phase 6: Production (Minggu 12)](#phase-6-production-minggu-12) — ❌ Belum dimulai
 8. [Daftar Risiko & Mitigasi](#daftar-risiko--mitigasi)
 9. [Definisi "Selesai" (Definition of Done)](#definisi-selesai-definition-of-done)
+10. [📍 LANGKAH SELANJUTNYA — Action Plan Detail](#-langkah-selanjutnya--action-plan-detail) — **MULAI DARI SINI**
 
 ---
 
@@ -1107,24 +1111,38 @@ jobs:
 
 ### Checklist Akhir Phase 1
 
-- [ ] Project Flutter bisa `flutter run` tanpa error
-- [ ] Folder structure Clean Architecture lengkap
-- [ ] Semua domain entity (12 entity) ter-generate dengan Freezed
-- [ ] Repository interfaces terdefinisi
-- [ ] CRUD use cases terdefinisi
-- [ ] Isar database setup dengan enkripsi AES-256
-- [ ] Encryption key management via Android Keystore
-- [ ] DI container (GetIt + Injectable) terkonfigurasi
-- [ ] Riverpod providers bridge ke use cases
-- [ ] GoRouter setup dengan 4 tab navigation
-- [ ] Material 3 tema (light + dark)
-- [ ] Repository implementation + integration tests
-- [ ] Onboarding flow (3-4 screen)
-- [ ] Biometric lock (opsional)
-- [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Minimum 5 unit tests + 2 integration tests passing
-- [ ] `flutter analyze` 0 warnings
-- [ ] Git: branch `feature/foundation-setup` merged ke `develop`
+- [x] Project Flutter bisa `flutter run` tanpa error ✅ _Selesai — project berjalan, SDK ^3.11.0, main.dart → ProviderScope → MedMindApp_
+- [x] Folder structure Clean Architecture lengkap ✅ _Selesai — lib/app, core, domain, data, presentation, platform semua sudah ada_
+- [x] Semua domain entity (12 entity) ter-generate dengan Freezed ✅ _Selesai — JournalEntry, Symptom (+ SymptomLog + ExtractedSymptom), Medication (+ MedicationLog), SleepRecord, LifestyleFactor (+ LifestyleFactorLog), Insight, CorrelationResult, HealthScore. Semua file `.freezed.dart` ter-generate._
+- [x] Repository interfaces terdefinisi ✅ _Selesai — 6 abstract class: JournalRepository, SymptomRepository, InsightRepository, MlRepository, HealthConnectRepository, UserPreferencesRepository_
+- [x] CRUD use cases terdefinisi ✅ _Selesai — 16 use cases: 5 Journal, 4 Insight, 2 ML, 3 Health Connect, 2 Export_
+- [x] Enum collections ✅ _Selesai — Mood, ActivityLevel, SymptomCategory, FactorType, InsightType, ScoreTrend di `enum_collection.dart`_
+- [x] Error handling (Failure sealed class) ✅ _Selesai — 8 Failure types di `failures.dart`, pola `Either<Failure, T>` dari dartz dipakai konsisten_
+- [x] GoRouter setup dengan 4 tab navigation ✅ _Selesai — ShellRoute + StatefulShellBranch untuk Home, Journal, Insights, Settings. Nested routes untuk journal/:id, settings sub-pages._
+- [x] Route constants ✅ _Selesai — 12 route name constants di `route_names.dart`_
+- [x] Material 3 tema (dark mode) ✅ _Selesai — Tema dark komprehensif (~200+ baris): ColorScheme, component themes (buttons, input, cards, dialogs, chips, sliders, tabs, dll.), app bar, bottom nav styling. Color tokens: Zinc, Teal, Cyan, Red, Amber, Emerald, dll._
+- [x] Typography system ✅ _Selesai — Inter + JetBrains Mono via Google Fonts, skala: Display, H1-H3, Body, Small, Caption, Micro, Overline_
+- [x] Bottom navigation shell ✅ _Selesai — Custom bottom nav 4 tab: Home, Journal, Insights, Settings, dengan teal highlight active state_
+- [x] Onboarding page (screen 1) ✅ _Selesai — Brain icon, feature pills (On-device AI, 100% Private, Offline-first), CTA buttons. Desain profesional._
+- [x] Android build config ✅ _Selesai — minSdk 26, Health Connect client 1.1.0-rc01, kotlinx-coroutines-android_
+- [x] Dependencies di pubspec.yaml ✅ _Selesai — flutter_riverpod, isar, freezed, get_it, injectable, go_router, flutter_secure_storage, encrypt, dartz, google_fonts, lucide_icons, flutter_animate, dll._
+- [ ] ❌ Isar database setup dengan enkripsi AES-256 — _File `isar_database.dart` dan semua local datasource files KOSONG. Isar ada di pubspec tapi belum dipakai._
+- [ ] ❌ Encryption key management via Android Keystore — _File `keystore_channel.dart` KOSONG. `flutter_secure_storage` ada di pubspec tapi belum dipakai._
+- [ ] ❌ DI container (GetIt + Injectable) terkonfigurasi — _File `injection.dart` KOSONG. `get_it` dan `injectable` ada di pubspec tapi belum di-wire._
+- [ ] ❌ Riverpod providers bridge ke use cases — _Tidak ada providers yang terdefinisi. Riverpod hanya sebatas ProviderScope di main.dart._
+- [ ] ❌ Data Models (Isar Collection) — _File `medication_model.dart` dan `symptom_model.dart` KOSONG. Belum ada Isar schema/collection._
+- [ ] ❌ Mappers (Entity ↔ Model) — _File `journal_entry_mapper.dart` dan `symptom_mapper.dart` KOSONG._
+- [ ] ❌ Repository implementation + integration tests — _Semua 6 file `_\_repository_impl.dart` KOSONG.\*
+- [ ] ❌ Local data sources — _`journal_local_datasource.dart`, `symptom_local_datasource.dart`, `insight_cache_datasource.dart` semua KOSONG._
+- [ ] ❌ Core utilities — _`date_utils.dart`, `logger.dart`, `exceptions.dart` semua KOSONG._
+- [ ] 🟡 Onboarding flow (3-4 screen) — _Hanya screen 1 (welcome) selesai. `SymptomSetupPage` parsial (progress "2 of 4", skeleton). Screen 3 & 4 belum ada._
+- [ ] ❌ Biometric lock (opsional)
+- [ ] ❌ CI/CD pipeline (GitHub Actions) — _Folder `.github/workflows/` belum ada._
+- [ ] ❌ Minimum 5 unit tests + 2 integration tests passing — _Belum ada test files._
+- [ ] ❌ `flutter analyze` 0 warnings — _Belum diverifikasi setelah semua perubahan._
+- [ ] ❌ Git: branch `feature/foundation-setup` merged ke `develop`
+
+> **Ringkasan Phase 1:** Domain layer (entities, repositories, use cases) 100% selesai. Arsitektur, routing, dan theming 100% selesai. Tapi Data layer (database, data sources, implementasi repository, DI) 0% — ini jadi blocker utama sebelum bisa lanjut ke Phase 2.
 
 ---
 
@@ -1426,22 +1444,24 @@ workmanager: ^0.5.x # Untuk background scheduling
 
 ### Checklist Akhir Phase 2
 
-- [ ] Mood picker dengan intensity slider
-- [ ] Symptom selector dengan severity + multi-select
-- [ ] Sleep input (bedtime, wake time, quality, disturbances)
-- [ ] Medication logger (quick toggle + detail)
-- [ ] Lifestyle factor logger (boolean/numeric/scale)
-- [ ] Free text input
-- [ ] Auto-save draft (30 detik interval)
-- [ ] Journal list dengan lazy loading + search
-- [ ] Home page daily summary + streak counter
-- [ ] Basic reminder notification system
-- [ ] Adaptive reminder analytics foundation
-- [ ] Health Connect platform channel (Kotlin + Dart)
-- [ ] Health Connect settings page
-- [ ] Widget tests untuk semua input components
-- [ ] Integration test: full journal CRUD flow
-- [ ] Git: branch `feature/journal-crud` + `feature/health-connect` merged ke `develop`
+- [ ] ❌ Mood picker dengan intensity slider — _Tidak ada widget di `presentation/widgets/`. `JournalEntryPage` hanya punya conditional logic New/Edit, belum ada form._
+- [ ] ❌ Symptom selector dengan severity + multi-select
+- [ ] ❌ Sleep input (bedtime, wake time, quality, disturbances)
+- [ ] ❌ Medication logger (quick toggle + detail)
+- [ ] ❌ Lifestyle factor logger (boolean/numeric/scale)
+- [ ] ❌ Free text input
+- [ ] ❌ Auto-save draft (30 detik interval)
+- [ ] ❌ Journal list dengan lazy loading + search — _`JournalListPage` hanya stub: "Journal" text centered._
+- [ ] ❌ Home page daily summary + streak counter — _`HomePage` hanya stub: "Home" text centered._
+- [ ] ❌ Basic reminder notification system — _Package `flutter_local_notifications` belum di pubspec._
+- [ ] ❌ Adaptive reminder analytics foundation
+- [ ] ❌ Health Connect platform channel (Kotlin + Dart) — _`health_connect_channel.dart` KOSONG. Native Kotlin plugin belum ada. Android manifest permissions belum ditambahkan._
+- [ ] ❌ Health Connect settings page — _`HealthConnectSettingsPage` hanya stub kosong._
+- [ ] ❌ Widget tests untuk semua input components
+- [ ] ❌ Integration test: full journal CRUD flow
+- [ ] ❌ Git: branch `feature/journal-crud` + `feature/health-connect` merged ke `develop`
+
+> **Ringkasan Phase 2:** Belum dimulai sama sekali. Phase 1 harus diselesaikan dulu (khususnya Isar database, DI, dan repository implementations) sebelum bisa mulai Phase 2.
 
 ---
 
@@ -1973,19 +1993,21 @@ class AnomalyDetector {
 
 ### Checklist Akhir Phase 3
 
-- [ ] DataPreparationService: journal entries → time series matrix
-- [ ] CorrelationEngine: 4 metode (Pearson, Spearman, point-biserial, chi-square)
-- [ ] P-value calculation
-- [ ] Bonferroni correction
-- [ ] Lagged correlation analysis (lag 0–3)
-- [ ] AnomalyDetector: Z-score + moving average
-- [ ] InsightGenerator: template-based NLG (Bahasa Indonesia + English)
-- [ ] InsightEngine orchestrator
-- [ ] HealthScore calculator
-- [ ] Insight caching di Isar
-- [ ] 100% unit test coverage untuk semua domain services
-- [ ] Property-based tests untuk statistical correctness
-- [ ] Git: branch `feature/insight-engine` merged ke `develop`
+- [ ] ❌ DataPreparationService: journal entries → time series matrix — _`insight_engine.dart` (satu-satunya file di domain/services/) KOSONG._
+- [ ] ❌ CorrelationEngine: 4 metode (Pearson, Spearman, point-biserial, chi-square)
+- [ ] ❌ P-value calculation
+- [ ] ❌ Bonferroni correction
+- [ ] ❌ Lagged correlation analysis (lag 0–3)
+- [ ] ❌ AnomalyDetector: Z-score + moving average
+- [ ] ❌ InsightGenerator: template-based NLG (Bahasa Indonesia + English)
+- [ ] ❌ InsightEngine orchestrator
+- [ ] ❌ HealthScore calculator
+- [ ] ❌ Insight caching di Isar
+- [ ] ❌ 100% unit test coverage untuk semua domain services
+- [ ] ❌ Property-based tests untuk statistical correctness
+- [ ] ❌ Git: branch `feature/insight-engine` merged ke `develop`
+
+> **Ringkasan Phase 3:** Belum dimulai. Membutuhkan data dari Phase 2 (journal entries) untuk bisa diproses. Entity `CorrelationResult`, `HealthScore`, `Insight` sudah didefinisikan di domain, tapi belum ada service/logic yang mengisi mereka.
 
 ---
 
@@ -2413,19 +2435,21 @@ group('SymptomExtractor', () {
 
 ### Checklist Akhir Phase 4
 
-- [ ] Minimal 2 TFLite models bundled (NLP + anomaly)
-- [ ] TFLite inference bekerja di isolate (tidak block UI)
-- [ ] IsolatePoolManager: load, run, dispose
-- [ ] MLModelManager: lifecycle management dengan AppLifecycleState
-- [ ] SymptomExtractor: ML-based extraction
-- [ ] RuleBasedSymptomExtractor: keyword-based fallback
-- [ ] Graceful degradation: ML failure → fallback → still works
-- [ ] NLP results terintegrasi ke journal save flow
-- [ ] ML anomaly score terintegrasi ke Insight Engine
-- [ ] Suggestion dialog untuk medium-confidence extractions
-- [ ] ML integration tests (known input → expected output)
-- [ ] Performance test: inference < 500ms on mid-range device
-- [ ] Git: branch `feature/tflite-integration` merged ke `develop`
+- [ ] ❌ Minimal 2 TFLite models bundled (NLP + anomaly) — _File `.tflite` di `ml/models/` ada tapi KOSONG (0 bytes). Notebooks ada tapi belum dijalankan/trained. `tflite_flutter` package belum di pubspec.yaml._
+- [ ] ❌ TFLite inference bekerja di isolate (tidak block UI) — _`tflite_engine.dart`, `isolate_pool_manager.dart` KOSONG._
+- [ ] ❌ IsolatePoolManager: load, run, dispose
+- [ ] ❌ MLModelManager: lifecycle management dengan AppLifecycleState
+- [ ] ❌ SymptomExtractor: ML-based extraction — _`symptom_classifier.dart` KOSONG._
+- [ ] ❌ RuleBasedSymptomExtractor: keyword-based fallback
+- [ ] ❌ Graceful degradation: ML failure → fallback → still works
+- [ ] ❌ NLP results terintegrasi ke journal save flow
+- [ ] ❌ ML anomaly score terintegrasi ke Insight Engine — _`anomaly_model.dart`, `correlation_model.dart` KOSONG._
+- [ ] ❌ Suggestion dialog untuk medium-confidence extractions
+- [ ] ❌ ML integration tests (known input → expected output)
+- [ ] ❌ Performance test: inference < 500ms on mid-range device
+- [ ] ❌ Git: branch `feature/tflite-integration` merged ke `develop`
+
+> **Ringkasan Phase 4:** Infrastruktur Python ML (requirements.txt, notebook scaffolds) sudah ada. Tapi model belum di-train, TFLite belum di-bundle, dan semua file integrasi Flutter–ML KOSONG. Prerequisites: Phase 3 insight engine harus jalan dulu.
 
 ---
 
@@ -2799,19 +2823,21 @@ class HealthScoreRingPainter extends CustomPainter {
 
 ### Checklist Akhir Phase 5
 
-- [ ] Correlation heatmap (CustomPainter) dengan tap interactivity
-- [ ] Symptom timeline (CustomPainter) dengan scroll + viewport culling
-- [ ] Health score ring animation (animated, gradient, glow)
-- [ ] Insights page: score + tabs + insight cards + empty state
-- [ ] PDF report generator
-- [ ] CSV export
-- [ ] Export page UI with share
-- [ ] 5 golden tests
-- [ ] E2E integration test (30 entries → insights → export)
-- [ ] Performance profiling documented
-- [ ] Dark mode review
-- [ ] Accessibility audit (semantic labels)
-- [ ] Git: branches `feature/custom-visualizations` + `feature/export` merged ke `develop`
+- [ ] ❌ Correlation heatmap (CustomPainter) dengan tap interactivity — _Tidak ada widget files di `presentation/widgets/` atau `presentation/pages/insights/widgets/`._
+- [ ] ❌ Symptom timeline (CustomPainter) dengan scroll + viewport culling
+- [ ] ❌ Health score ring animation (animated, gradient, glow)
+- [ ] ❌ Insights page: score + tabs + insight cards + empty state — _`InsightsPage` stub: "Insights" text centered._
+- [ ] ❌ PDF report generator — _Package `pdf` dan `printing` belum di pubspec._
+- [ ] ❌ CSV export
+- [ ] ❌ Export page UI with share — _`ExportPage` stub kosong._
+- [ ] ❌ 5 golden tests
+- [ ] ❌ E2E integration test (30 entries → insights → export)
+- [ ] ❌ Performance profiling documented
+- [ ] ❌ Dark mode review — _Tema dark sudah implementasi kuat, tapi belum ada page yang memanfaatkannya secara penuh._
+- [ ] ❌ Accessibility audit (semantic labels)
+- [ ] ❌ Git: branches `feature/custom-visualizations` + `feature/export` merged ke `develop`
+
+> **Ringkasan Phase 5:** Belum dimulai. Tapi fondasi UI (tema, warna, tipografi) sudah sangat solid — siap dipakai begitu data layer dan insight engine selesai.
 
 ---
 
@@ -2953,20 +2979,797 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 ### Checklist Akhir Phase 6
 
-- [ ] Sentry error monitoring terpasang dengan PII scrubbing
-- [ ] App size < 30MB
-- [ ] Cold start < 3 detik
-- [ ] 0 jank frames di scrolling
-- [ ] App signing configured
-- [ ] App icon & splash screen
-- [ ] Store listing (screenshots, description, privacy policy)
-- [ ] Release build berhasil
-- [ ] Tested di 3+ device berbeda
-- [ ] All tests pass di CI (tinggal lihat berapa test count)
-- [ ] Code coverage >= 80%
-- [ ] `develop` merged ke `main`
-- [ ] Tagged v1.0.0
-- [ ] Published ke Play Store
+- [ ] ❌ Sentry error monitoring terpasang dengan PII scrubbing — _Package `sentry_flutter` belum di pubspec._
+- [ ] ❌ App size < 30MB
+- [ ] ❌ Cold start < 3 detik
+- [ ] ❌ 0 jank frames di scrolling
+- [ ] ❌ App signing configured
+- [ ] ❌ App icon & splash screen
+- [ ] ❌ Store listing (screenshots, description, privacy policy)
+- [ ] ❌ Release build berhasil
+- [ ] ❌ Tested di 3+ device berbeda
+- [ ] ❌ All tests pass di CI (tinggal lihat berapa test count)
+- [ ] ❌ Code coverage >= 80%
+- [ ] ❌ `develop` merged ke `main`
+- [ ] ❌ Tagged v1.0.0
+- [ ] ❌ Published ke Play Store
+
+> **Ringkasan Phase 6:** Belum dimulai. Sepenuhnya bergantung pada penyelesaian Phase 1–5.
+
+---
+
+## 📍 LANGKAH SELANJUTNYA — Action Plan Detail
+
+> Berdasarkan analisis codebase per 6 Maret 2026:
+>
+> - **Yang sudah selesai:** Domain layer lengkap (entities, repositories, use cases), arsitektur/routing/theming, onboarding screen 1
+> - **Bottleneck utama:** Data layer belum ada sama sekali — tidak ada database, tidak ada persistence, tidak ada DI wiring
+> - **Prinsip:** Setiap step di bawah menghasilkan sesuatu yang bisa dijalankan dan diverifikasi sebelum lanjut ke step berikutnya.
+
+### STEP 1: Selesaikan Core Utilities & Error Handling
+
+**Konteks:** File-file utility dasar (`logger.dart`, `date_utils.dart`, `exceptions.dart`) saat ini kosong. Ini dibutuhkan oleh hampir semua layer di atasnya — data sources perlu logging, repository implementation perlu exception handling, presentation perlu date formatting.
+
+**Sub-tasks:**
+
+1. **`lib/core/utils/logger.dart`** — Inisialisasi Logger instance dari package `logger` (sudah ada di pubspec). Buat singleton `AppLogger` dengan method `d()`, `i()`, `w()`, `e()` yang wrap Logger. Ini akan dipakai di repository implementations dan data sources untuk debugging.
+
+2. **`lib/core/utils/date_utils.dart`** — Implementasi helpers:
+   - `DateTime toStartOfDay()` — strip waktu, return awal hari (00:00:00)
+   - `DateTime toEndOfDay()` — return akhir hari (23:59:59)
+   - `String formatReadable(DateTime)` — human-readable ("Senin, 6 Mar 2026" via `intl`)
+   - `String formatRelative(DateTime)` — "Hari ini", "Kemarin", "3 hari lalu"
+   - `bool isSameDay(DateTime a, DateTime b)`
+   - `DateTimeRange lastNDays(int n)` — helper untuk query data
+   - Dibutuhkan oleh: data preparation service (Phase 3), journal list UI (Phase 2), insight engine
+
+3. **`lib/core/errors/exceptions.dart`** — Buat custom exceptions yang di-throw oleh data layer dan di-catch oleh repository implementations untuk dikonversi jadi `Failure`:
+   - `DatabaseException` — gagal baca/tulis Isar
+   - `EncryptionException` — gagal encrypt/decrypt
+   - `ModelParseException` — gagal convert model ↔ entity
+   - `MLInferenceException` — TFLite model error
+   - `HealthConnectException` — platform channel error
+   - Setiap exception punya field `message` dan optional `stackTrace`
+
+**Verifikasi:** `dart analyze` bersih. Import di file lain tidak error.
+
+**Output step ini → input step berikutnya:** Logger siap dipakai di semua data source. Date utils siap untuk formatting & query. Exceptions siap di-throw dari data layer dan di-catch di repository layer.
+
+---
+
+### STEP 2: Setup Dependency Injection (GetIt + Injectable)
+
+**Konteks:** `lib/core/di/injection.dart` kosong. Package `get_it` dan `injectable` sudah ada di pubspec. Tanpa DI, tidak ada cara menghubungkan use case → repository → data source. Ini dependency paling kritis sebelum bisa mulai implementasi data layer.
+
+**Sub-tasks:**
+
+1. **`lib/core/di/injection.dart`** — Implementasi setup:
+
+   ```dart
+   final getIt = GetIt.instance;
+
+   @InjectableInit()
+   Future<void> configureDependencies() async => getIt.init();
+   ```
+
+2. **Jalankan `dart run build_runner build --delete-conflicting-outputs`** — Generate `injection.config.dart`. Pada titik ini file-nya akan kosong karena belum ada class yang di-annotate `@injectable`, tapi file harus ter-generate tanpa error.
+
+3. **Update `lib/main.dart`** — Panggil `await configureDependencies()` sebelum `runApp()`. Ini memastikan semua dependency siap sebelum app start:
+
+   ```dart
+   void main() async {
+     WidgetsFlutterBinding.ensureInitialized();
+     await configureDependencies();
+     runApp(const ProviderScope(child: MedMindApp()));
+   }
+   ```
+
+4. **Buat file `lib/presentation/providers/core_providers.dart`** — Bridge Riverpod ↔ GetIt:
+   ```dart
+   // Provider yang expose GetIt instances ke Riverpod widget tree
+   // Ini menghubungkan Presentation layer (Riverpod) dengan dependency graph (GetIt)
+   ```
+   Definisikan provider placeholder untuk `JournalRepository`, `SymptomRepository`, dll. yang resolve dari `getIt`. Mereka akan mulai berfungsi setelah Step 4 (repository implementations di-register).
+
+**Verifikasi:** `flutter run` tetap berjalan. `injection.config.dart` ter-generate. `configureDependencies()` dipanggil di `main()`.
+
+**Output step ini → input step berikutnya:** DI container siap. Setiap class yang di-annotate `@injectable` atau `@lazySingleton` otomatis ter-register. Riverpod providers bisa resolve instances dari GetIt.
+
+---
+
+### STEP 3: Implementasi Isar Database + Enkripsi + Data Models
+
+**Konteks:** Isar sudah di pubspec (`isar: ^2.1.4`, `isar_flutter_libs`). Tapi belum ada schema, belum ada database initialization, belum ada enkripsi. Step 2 sudah menyiapkan DI container — sekarang kita isi dengan database instance.
+
+**Dependency dari Step 2:** DI container (`getIt`) sudah aktif. Logger dari Step 1 tersedia untuk error logging.
+
+**Sub-tasks:**
+
+1. **`lib/data/models/journal_entry_model.dart`** — Buat Isar collection model:
+   - Annotasi `@Collection()` + `Id` field
+   - `@Index(unique: true)` pada `uid` (UUID dari domain entity)
+   - `@Index()` pada `date` untuk query by date range
+   - Embedded objects: `SymptomLogEmbed`, `MedicationLogEmbed`, `SleepRecordEmbed`, `LifestyleFactorLogEmbed`, `ExtractedSymptomEmbed` — masing-masing pakai `@Embedded()`
+   - Enum fields pakai `@Enumerated(EnumType.name)`
+   - Semua fields harus _mirror_ domain entity `JournalEntry`, tapi dalam format yang Isar bisa store
+
+2. **`lib/data/models/symptom_model.dart`** — Isar collection untuk master data `Symptom`:
+   - `uid`, `name`, `category` (indexed), `icon`, `isCustom`
+   - Pre-populate dengan default symptoms saat first launch (via migration/seed)
+
+3. **Buat file baru `lib/data/models/insight_model.dart`** — Isar collection untuk cached insights:
+   - Mirror domain entity `Insight` — `uid`, `type`, `title`, `description`, `confidence`, `relatedVariables`, `generatedAt`, `isRead`, `isSaved`
+
+4. **`lib/data/datasources/local/isar_database.dart`** — Database initialization:
+   - `static Future<Isar> initialize(String? encryptionKey)` — buka Isar dengan semua schemas
+   - Param `encryptionKey` untuk AES-256 (nullable untuk dev/testing tanpa enkripsi)
+   - Register sebagai `@lazySingleton` di DI container
+   - Pakai `path_provider` untuk mendapatkan documents directory
+
+5. **`lib/platform/keystore_channel.dart`** — Encryption key management:
+   - Pakai `FlutterSecureStorage` (sudah di pubspec) untuk store key
+   - `getOrCreateKey()` — generate random 32-byte key jika belum ada, simpan di secure storage, return key
+   - `destroyKey()` — hapus key (cryptographic erasure untuk account deletion)
+   - Register sebagai `@lazySingleton`
+
+6. **Jalankan `dart run build_runner build --delete-conflicting-outputs`** — Generate Isar schema files (`.g.dart`)
+
+7. **Update DI setup** — Register Isar instance di `configureDependencies()`:
+   - Baca/generate encryption key → buka Isar → register Isar instance di GetIt
+   - Ini harus ASYNC dan dilakukan sebelum `runApp()`
+
+**Verifikasi:** `flutter run` berhasil. Isar instance terbuat di device/emulator. Cek: `getIt<Isar>()` return instance yang valid. Log: "Isar database initialized at /path".
+
+**Output step ini → input step berikutnya:** Database Isar aktif + terenkripsi. Model/schema siap dipakai oleh data sources. Step 4 akan menggunakan Isar instance ini untuk CRUD operations.
+
+---
+
+### STEP 4: Implementasi Mappers + Data Sources + Repository Implementations
+
+**Konteks:** Sekarang kita punya: domain entities (Step 0, sudah selesai), Isar models (Step 3), DI container (Step 2). Yang kurang adalah "lem" yang menghubungkan semua layer — mappers, data sources, dan repository implementations.
+
+**Dependency dari Step 3:** Isar instance terenkripsi sudah aktif dan ter-register di GetIt. Model schemas ter-generate.
+
+**Sub-tasks (kerjakan berurutan karena saling tergantung):**
+
+**4a. Mappers:**
+
+1. **`lib/data/mappers/journal_entry_mapper.dart`**:
+   - `static JournalEntry toDomain(JournalEntryModel model)` — convert semua field termasuk nested objects (SymptomLogEmbed → SymptomLog, dll.)
+   - `static JournalEntryModel toModel(JournalEntry entity)` — reverse conversion
+   - **Test kunci:** buat round-trip test: `entity → model → entity` harus identik
+
+2. **`lib/data/mappers/symptom_mapper.dart`**:
+   - `static Symptom toDomain(SymptomModel model)`
+   - `static SymptomModel toModel(Symptom entity)`
+
+**4b. Local Data Sources (semua di-annotate `@lazySingleton` untuk DI):**
+
+3. **`lib/data/datasources/local/journal_local_datasource.dart`**:
+   - Constructor: inject `Isar` instance
+   - `create(JournalEntryModel)` → `isar.writeTxn(() => isar.journalEntryModels.put(model))`
+   - `query({startDate, endDate, limit, offset})` → filtered query, sorted by date desc
+   - `getById(String uid)` → query by uid index
+   - `update(JournalEntryModel)` → update dalam transaction
+   - `delete(String uid)` → hapus by uid
+   - `search(String query)` → full-text search di freeText field
+   - `watchAll({startDate, endDate})` → `isar.journalEntryModels.where().watch()`
+
+4. **`lib/data/datasources/local/symptom_local_datasource.dart`**:
+   - CRUD untuk master data symptoms
+   - `getSelected()` → symptoms yang user pilih saat onboarding
+   - `setSelected(List<String> ids)` — simpan pilihan user
+   - Pre-seed default symptoms (headache, nausea, fatigue, dll.) saat first launch
+
+5. **`lib/data/datasources/local/insight_cache_datasource.dart`**:
+   - Save/load cached insight reports
+   - TTL-based invalidation (24 jam)
+
+**4c. Repository Implementations (annotate `@LazySingleton(as: XxxRepository)`):**
+
+6. **`lib/data/repositories/journal_repository_impl.dart`**:
+   - Inject `JournalLocalDataSource`
+   - Setiap method: panggil data source → pakai mapper untuk convert → wrap result dalam `Right()` atau `Left(DatabaseFailure)` jika error
+   - Implementasi semua 7 methods dari `JournalRepository` interface
+
+7. **`lib/data/repositories/symptom_repository_impl.dart`**:
+   - Inject `SymptomLocalDataSource`
+   - Full CRUD + `getSelected`/`setSelected`
+
+8. **`lib/data/repositories/insight_repository_impl.dart`**:
+   - Inject `InsightCacheDataSource`
+   - Save, load, mark read, toggle saved
+
+9. **`lib/data/repositories/user_preferences_repository_impl.dart`**:
+   - Inject `FlutterSecureStorage` atau `SharedPreferences`
+   - Manage: biometric on/off, onboarding complete, reminder time, theme mode, tracked symptom IDs
+   - **Tambahkan `shared_preferences` ke pubspec.yaml** jika belum ada
+
+10. **`lib/data/repositories/ml_repository_impl.dart`** — Sementara return stub/placeholder (ML belum ready, tapi interface harus ter-satisfy untuk DI). Return `Left(MLFailure('ML models not yet initialized'))` untuk semua methods.
+
+11. **`lib/data/repositories/health_connect_repository_impl.dart`** — Sementara return stub (Health Connect belum ready). Return `Left(HealthConnectFailure('Not yet implemented'))`.
+
+**4d. Jalankan build_runner & register semua di DI:**
+
+12. Jalankan `dart run build_runner build --delete-conflicting-outputs`
+13. Pastikan `injection.config.dart` sekarang berisi registration untuk semua data sources dan repository implementations
+14. Verify: `getIt<JournalRepository>()` return `JournalRepositoryImpl` instance
+
+**Verifikasi:** Tulis 1 integration test:
+
+- Create journal entry → read back → verify field match
+- Search → verify results
+- Delete → verify gone
+- `flutter test` pass
+
+**Output step ini → input step berikutnya:** Seluruh data pipeline berfungsi (Entity ↔ Model ↔ Database). Use cases dari domain layer sekarang bisa benar-benar dieksekusi. Step 5 akan menghubungkan ini ke UI melalui Riverpod providers.
+
+---
+
+### STEP 5: Wiring Riverpod Providers + State Management
+
+**Konteks:** Use cases sudah ada (domain), repository implementations sudah aktif di DI (Step 4). Sekarang perlu bridge ke Presentation layer. Tanpa providers, UI tidak bisa baca/tulis data.
+
+**Dependency dari Step 4:** Semua repository implementations ter-register dan berfungsi di GetIt. DI resolve berhasil.
+
+**Sub-tasks:**
+
+1. **Buat `lib/presentation/providers/journal_providers.dart`**:
+   - `journalRepositoryProvider` — Riverpod `Provider` yang resolve dari `getIt<JournalRepository>()`
+   - `journalEntriesProvider` — `FutureProvider.family<List<JournalEntry>, DateRange?>` yang panggil `getEntries()`
+   - `journalEntryProvider(String id)` — load single entry by ID
+   - `journalFormNotifier` — `StateNotifier` atau `Notifier` yang manage form state (mood, symptoms, sleep, medications, lifestyle, freeText) dan method `submit()` yang panggil `CreateJournalEntry` use case
+   - `journalSearchProvider(String query)` — untuk search
+
+2. **Buat `lib/presentation/providers/symptom_providers.dart`**:
+   - `allSymptomsProvider` — load semua symptoms dari repo
+   - `selectedSymptomsProvider` — symptoms yang user track
+   - `symptomSetupNotifier` — manage state untuk onboarding symptom setup page
+
+3. **Buat `lib/presentation/providers/preference_providers.dart`**:
+   - `onboardingCompleteProvider` — cek apakah user sudah selesai onboarding
+   - `biometricEnabledProvider`
+   - `reminderTimeProvider`
+   - `themeModeProvider`
+
+4. **Update `lib/app/app.dart`** — Gunakan `onboardingCompleteProvider` untuk tentukan initial route:
+   - Kalau belum onboarding → route ke `/onboarding`
+   - Kalau sudah → route ke `/` (home)
+
+5. **Update `lib/app/routes/app_router.dart`** — Tambahkan redirect logic berdasarkan onboarding status
+
+**Verifikasi:** `flutter run` → app detect first launch → arahkan ke onboarding. State berubah saat interact. Console log menunjukkan providers resolving correctly.
+
+**Output step ini → input step berikutnya:** UI layer sekarang bisa baca dan tulis data. Step 6 menggunakan providers ini untuk membangun form journal yang fungsional.
+
+---
+
+### STEP 6: Selesaikan Onboarding Flow (Screen 2–4) & First Launch
+
+**Konteks:** Screen 1 (welcome) sudah selesai dan terlihat profesional. `SymptomSetupPage` ada tapi parsial. Perlu 2-3 screen lagi. Step 5 sudah menyiapkan `symptomSetupNotifier` dan `onboardingCompleteProvider`.
+
+**Dependency dari Step 5:** Provider `selectedSymptomsProvider`, `symptomSetupNotifier`, `onboardingCompleteProvider` sudah aktif dan terhubung ke database.
+
+**Sub-tasks:**
+
+1. **`lib/presentation/pages/onboarding/symptom_setup_page.dart`** — Lengkapi implementasi:
+   - Load daftar default symptoms dari `allSymptomsProvider`
+   - Grid/wrap chips: user tap untuk toggle select
+   - Search bar untuk filter symptoms
+   - Tombol "+" untuk tambah custom symptom
+   - Counter "X gejala dipilih"
+   - Continue button → save selected symptoms via `symptomSetupNotifier` → navigate ke screen 3
+
+2. **Buat `lib/presentation/pages/onboarding/lifestyle_setup_page.dart`** (screen 3):
+   - Mirip symptom setup tapi untuk lifestyle factors (Caffeine, Alcohol, Exercise, Water, Screen Time, dll.)
+   - Toggle yang mana ingin di-track
+   - Save pilihan ke `UserPreferencesRepository`
+   - Continue → screen 4
+
+3. **Buat `lib/presentation/pages/onboarding/security_setup_page.dart`** (screen 4):
+   - Toggle biometric lock on/off
+   - Penjelasan singkat tentang enkripsi data
+   - Tombol "Mulai Journaling!" → markOnboardingComplete() → navigate ke `/` (home)
+   - Skip button untuk skip biometric setup
+
+4. **Update routing**: Pastikan onboarding flow linear: screen 1 → 2 → 3 → 4 → home. Back button di screen 2+ kembali ke screen sebelumnya (bukan keluar onboarding).
+
+5. **Seed default symptoms** — Saat pertama kali Isar dibuka (atau saat `configureDependencies()`), seed 30-50 default symptoms ke database jika tabel masih kosong. Kategorisasi: neurological (migraine, vertigo), digestive (nausea, bloating), respiratory (cough, congestion), dll.
+
+**Verifikasi:** Fresh install → onboarding 4 screen → pilih symptoms → pilih lifestyle → setup security → masuk home. Kill app → reopen → langsung masuk home (skip onboarding).
+
+**Output step ini → input step berikutnya:** User bisa setup tracker mereka. Master data symptoms tersimpan di database. App tahu apa yang harus ditampilkan di journal form (Step 7).
+
+---
+
+### STEP 7: Journal Entry Form — Semua Input Widgets
+
+**Konteks:** Sekarang user sudah onboarding, symptoms tersimpan, database aktif. Saatnya bangun form journal yang lengkap — ini adalah fitur inti MedMind. Step 6 output → kita tahu symptoms dan lifestyle factors apa yang user pilih.
+
+**Dependency dari Step 6:** Selected symptoms & lifestyle factors tersimpan. Journal form notifier dari Step 5 siap. `JournalRepository` berfungsi.
+
+**Sub-tasks:**
+
+1. **`lib/presentation/widgets/journal/mood_picker.dart`**:
+   - 5 emoji buttons (😊 🙂 😐 😟 😰) → tap untuk pilih
+   - Setelah pilih → intensity slider muncul (1-10) di bawahnya
+   - Default intensity: 5
+   - Animasi transisi (pakai `flutter_animate` yang sudah di pubspec)
+   - State: update `journalFormNotifier.updateMood()`
+
+2. **`lib/presentation/widgets/journal/symptom_selector.dart`**:
+   - Tampilkan chips dari `selectedSymptomsProvider` (symptoms yang user pilih saat onboarding)
+   - Tap chip → mini-form expand: severity slider (1-10) + optional notes text field
+   - Multi-select: bisa log beberapa gejala sekaligus
+   - Tombol "+" → dialog search & add gejala tambahan
+   - State: `journalFormNotifier.addSymptom()` / `removeSymptom()`
+
+3. **`lib/presentation/widgets/journal/sleep_input.dart`**:
+   - Bedtime picker (TimePicker) + wake time picker
+   - Auto-calculate & display duration ("7h 30m")
+   - Sleep quality slider (1-10)
+   - Disturbance counter (+/- stepper, default 0)
+   - State: `journalFormNotifier.updateSleep()`
+
+4. **`lib/presentation/widgets/journal/medication_input.dart`**:
+   - List obat user (dari setup/settings, atau in-line add)
+   - Per obat: toggle taken ✅ / not taken ❌
+   - Tap → detail: waktu minum, dosis
+   - State: `journalFormNotifier.updateMedication()`
+
+5. **`lib/presentation/widgets/journal/lifestyle_input.dart`**:
+   - Render berdasarkan `FactorType` dari entity:
+     - `boolean` → toggle switch ("Consumed caffeine? Yes/No")
+     - `numeric` → number input + unit label ("Water: \_\_\_ glasses")
+     - `scale` → slider 1-10 ("Stress level")
+   - State: `journalFormNotifier.updateLifestyleFactor()`
+
+6. **`lib/presentation/widgets/journal/free_text_input.dart`**:
+   - Multi-line text field
+   - Placeholder: "How are you feeling today? Any triggers you noticed?"
+   - Word count di bawah
+   - State: `journalFormNotifier.updateFreeText()`
+
+**Verifikasi:** Buat widget test untuk setiap input widget: interact → verify form state berubah. Visual review di emulator.
+
+**Output step ini → input step berikutnya:** Semua input widgets siap. Step 8 merakit mereka menjadi halaman JournalEntryPage penuh dengan save flow.
+
+---
+
+### STEP 8: Journal Entry Page Assembly + Save Flow + List Page
+
+**Konteks:** Semua input widgets dari Step 7 sudah tersedia. Sekarang rangkai menjadi halaman lengkap dengan tab/section layout, save logic, dan list page.
+
+**Dependency dari Step 7:** Mood picker, symptom selector, sleep input, medication input, lifestyle input, free text input — semua sudah berfungsi dan terhubung ke `journalFormNotifier`.
+
+**Sub-tasks:**
+
+1. **`lib/presentation/pages/journal/journal_entry_page.dart`** — Full implementation:
+   - **Tab/section layout:**
+     - Tab 1: Mood + Symptoms (default, paling penting)
+     - Tab 2: Sleep + Medications
+     - Tab 3: Lifestyle + Notes
+   - **Date picker** di AppBar — default hari ini, bisa ganti
+   - **Edit mode:** Jika `entryId != null`, load existing entry dari `journalEntryProvider(id)`, pre-fill form
+   - **Submit button:** Validasi → buat `JournalEntry` entity → panggil `CreateJournalEntry` / `UpdateJournalEntry` use case via notifier → navigate back ke list + show success snackbar
+   - **Auto-save draft:** Timer 30 detik → simpan draft ke Isar (tambahkan field `isDraft` ke model)
+   - **Unsaved changes guard:** `WillPopScope` / `PopScope` → dialog "Simpan sebagai draft?" jika ada perubahan
+
+2. **`lib/presentation/pages/journal/journal_list_page.dart`** — Full implementation:
+   - List dari `journalEntriesProvider`
+   - Card UI per entry: tanggal, mood emoji, symptom badges, snippet dari freeText
+   - Infinite scroll / lazy loading (pagination via offset)
+   - Swipe to delete → undo snackbar (panggil `DeleteJournalEntry` use case)
+   - Tap card → navigate ke `/journal/:id` (edit)
+   - FAB → navigate ke `/journal/new`
+   - Empty state: "Belum ada entri. Mulai journaling hari ini!" dengan CTA button
+   - Search bar → `SearchJournalEntries` use case
+
+3. **Update `lib/presentation/pages/home/home_page.dart`**:
+   - Cek apakah hari ini sudah ada entry → tampilkan summary card (mood, symptom count, sleep duration)
+   - Kalau belum → CTA "Log hari ini" + quick-log buttons (mood-only quick entry)
+   - Streak counter: hitung consecutive days with entries
+   - Greeting berdasarkan waktu hari ("Selamat pagi, ...")
+
+4. **Loading & error states:**
+   - Implement `lib/presentation/shared/loading_indicator.dart` — custom shimmer atau circular progress
+   - Implement `lib/presentation/shared/error_widget.dart` — error message + retry button
+
+**Verifikasi:**
+
+- Integration test: create entry → appear in list → tap → see details → edit → save → verify update → delete → verify gone
+- Draft auto-save: create entry → isi partial → kill app → reopen → draft masih ada
+- `flutter run` → manual walkthrough full flow
+
+**Output step ini → input step berikutnya:** Full journaling flow berfungsi. User bisa buat, lihat, edit, dan hapus entries. Data tersimpan terenkripsi. Step 9 membangun reminder agar user konsisten logging.
+
+---
+
+### STEP 9: Basic Reminder System
+
+**Konteks:** Journaling flow sudah lengkap (Step 8). Sekarang bangun reminder supaya user konsisten. Reminder system sederhana dulu — adaptive analysis nanti.
+
+**Dependency dari Step 8:** User bisa create journal entries. `UserPreferencesRepository` bisa save/load reminder time.
+
+**Sub-tasks:**
+
+1. **Tambahkan di pubspec.yaml:**
+
+   ```yaml
+   flutter_local_notifications: ^17.x.x
+   ```
+
+2. **Buat `lib/data/datasources/local/notification_service.dart`**:
+   - Initialize `FlutterLocalNotificationsPlugin`
+   - `scheduleDailyReminder(TimeOfDay time)` — schedule repeating notification
+   - `cancelReminder()` — cancel scheduled notification
+   - Notification tap → deep link ke journal/new (via GoRouter)
+
+3. **Implement `lib/presentation/pages/settings/reminder_settings_page.dart`**:
+   - Toggle reminder on/off
+   - Time picker untuk pilih waktu reminder (default 21:00)
+   - Save ke `UserPreferencesRepository`
+   - Preview: "Kamu akan diingatkan setiap hari jam 21:00"
+
+4. **Implement `lib/presentation/pages/settings/settings_page.dart`**:
+   - List tile untuk setiap sub-setting: Reminders, Security, Health Connect, Export
+   - Navigate ke masing-masing sub-page
+   - Version info di bottom
+
+**Verifikasi:** Set reminder → tunggu → notification muncul → tap → app opens di journal/new page. Toggle off → notification stop.
+
+**Output step ini → input step berikutnya:** User diingatkan untuk journal. App mulai akumulasi data. Step 10 membangun fondasi analisis data (insight engine).
+
+---
+
+### STEP 10: Statistical Insight Engine (Domain Services)
+
+**Konteks:** Dengan Step 8 selesai, user mulai akumulasi journal entries. Sekarang bangun "otak" MedMind — pure Dart statistical engine yang olah data menjadi insights. Ini semua di domain layer — tidak tergantung package eksternal.
+
+**Dependency dari Step 8:** `JournalRepository` berfungsi, bisa query entries by date range. Domain entities `CorrelationResult`, `HealthScore`, `Insight` sudah terdefinisi dari awal.
+
+**Sub-tasks:**
+
+1. **Buat `lib/domain/services/data_preparation_service.dart`**:
+   - `TimeSeriesMatrix prepareMatrix(List<JournalEntry> entries)`:
+     - Sort entries by date
+     - Extract setiap variabel menjadi kolom: `mood_score`, `sleep_hours`, `sleep_quality`, `symptom_{name}_severity`, `med_{name}_taken`, `factor_{name}`, dll.
+     - Fill missing dates dengan null rows
+     - Normalize: boolean → 0/1, enum → int, severity → 0-10
+   - `List<VariablePair> identifyCorrelationCandidates(matrix, {minDataPoints: 14})`
+   - **Buat value class `TimeSeriesMatrix`**: `dates`, `columns (Map<String, List<double?>>)`, `variableTypes`, `getLaggedColumn(name, lag)`
+
+2. **Buat `lib/domain/services/correlation_engine.dart`**:
+   - `pearsonCorrelation(x, y)` → CorrelationResult (r, p-value)
+   - `spearmanCorrelation(x, y)` — rank-based, untuk ordinal data
+   - `pointBiserialCorrelation(binary, continuous)` — binary × continuous
+   - `chiSquareTest(x, y)` — binary × binary
+   - `riskRatio(exposure, outcome)` — relative risk calculation
+   - `bonferroniThreshold(numberOfTests)` — multiple testing correction
+   - **P-value:** Implementasi standard normal CDF (Abramowitz & Stegun approximation). Untuk n > 30, t-distribution ≈ normal distribution — cukup akurat.
+   - **WAJIB: Unit test coverage 100%** — test dengan data yang hasilnya diketahui pasti
+
+3. **Buat `lib/domain/services/anomaly_detector.dart`**:
+   - `detectZScoreAnomalies(matrix, {threshold: 2.0, baselineWindow: 30})` — flag hari yang >2 standard deviations dari mean
+   - `detectMovingAverageAnomalies(matrix, {window: 7, threshold: 1.5})` — moving average + MAD
+   - Helper: `_mean()`, `_standardDeviation()`, `_median()`, `_medianAbsoluteDeviation()`
+
+4. **Buat `lib/domain/services/insight_generator.dart`**:
+   - Template-based NLG (Natural Language Generation)
+   - `generateCorrelationInsight(CorrelationResult)` → `Insight` entity
+   - `generateAnomalyInsight(AnomalyResult)` → `Insight` entity
+   - Variasi template supaya tidak robotik (minimal 3 template per tipe)
+   - Human-readable variable names: `sleep_hours` → "durasi tidur", `symptom_migraine_severity` → "tingkat migraine"
+   - **Dual language:** Bahasa Indonesia primary, English secondary
+
+5. **Implementasi `lib/domain/services/insight_engine.dart`** (saat ini KOSONG):
+   - Orchestrator: `analyzeAll(List<JournalEntry> entries)` → `InsightReport`
+   - Pipeline: prepare matrix → run correlations (lag 0-3) → run anomaly detection → generate insights → deduplicate & rank by confidence → calculate health score → return report
+   - `_calculateHealthScore(matrix, anomalies)` — composite weighted score (mood trend, symptom frequency, sleep quality, anomaly count, medication compliance) → normalize 0-100
+
+6. **Buat value classes:** `InsightReport`, `AnomalyResult`, `TimeSeriesMatrix`, `VariablePair`
+
+**Verifikasi:**
+
+- Unit test `CorrelationEngine`: perfect positive (r=1), perfect negative (r=-1), no correlation (r≈0), known textbook results. Property tests: |r| ≤ 1, symmetry, p-value 0-1.
+- Unit test `AnomalyDetector`: injected outlier detected, normal data → no anomalies
+- Integration test: 30+ fixture journal entries → `InsightEngine.analyzeAll()` → returns ranked insights & health score
+- `dart analyze` bersih
+
+**Output step ini → input step berikutnya:** InsightEngine berfungsi end-to-end. Bisa feed data journal → dapat ranked insights + health score. Step 11 cache results dan expose ke UI.
+
+---
+
+### STEP 11: Insight Caching + Riverpod Wiring untuk Insights
+
+**Konteks:** Insight engine berjalan (Step 10), tapi analysis bisa lambat kalau banyak data. Perlu caching agar UI responsive. Plus konek ke Riverpod supaya insights muncul di Insights page.
+
+**Dependency dari Step 10:** `InsightEngine.analyzeAll()` berfungsi, return `InsightReport`.
+
+**Sub-tasks:**
+
+1. **`lib/data/datasources/local/insight_cache_datasource.dart`** — Full implementation:
+   - Save `InsightReport` ke Isar (convert masing-masing insight ke `InsightModel`)
+   - Load cached insights
+   - Check staleness: `isStale()` → true jika >24 jam sejak last analysis ATAU ada entry baru sejak last analysis
+   - Clear cache
+
+2. **`lib/data/repositories/insight_repository_impl.dart`** — Full implementation:
+   - `getInsights()`: cek cache → kalau stale, re-analyze → save to cache → return
+   - `saveInsight()`, `markAsRead()`, `toggleSaved()`, `getHealthScore()`, `saveHealthScore()`
+   - Semua wrapped dalam `Either<Failure, T>`
+
+3. **Buat `lib/presentation/providers/insight_providers.dart`**:
+   - `insightEngineProvider` — resolve InsightEngine dari DI
+   - `insightReportProvider` — `FutureProvider` yang load insights (dari cache atau fresh analysis)
+   - `healthScoreProvider` — expose HealthScore ke UI
+   - `topInsightsProvider` — top 5 insights sorted by confidence
+
+4. **Register `InsightEngine` dan sub-services di DI** — `DataPreparationService`, `CorrelationEngine`, `AnomalyDetector`, `InsightGenerator` semua `@lazySingleton`
+
+**Verifikasi:** `insightReportProvider` resolves. Mock/test: buat entries → load insights → cek cache hit on second load.
+
+**Output step ini → input step berikutnya:** Insights tersedia via Riverpod. Step 12 membangun UI page untuk menampilkannya.
+
+---
+
+### STEP 12: Insights Page UI + Health Score Ring + Visualization
+
+**Konteks:** Data insights tersedia via providers (Step 11). Sekarang bangun UI yang menampilkannya — health score ring, insight cards, dan minimal 1 custom visualization.
+
+**Dependency dari Step 11:** `insightReportProvider`, `healthScoreProvider`, `topInsightsProvider` aktif dan return data.
+
+**Sub-tasks:**
+
+1. **`lib/presentation/pages/insights/widgets/health_score_ring.dart`** — CustomPainter:
+   - Animated circular progress (score 0-100)
+   - Gradient arc: red (0-30), yellow (30-60), green (60-100)
+   - Glow effect di ujung arc
+   - Score number di center dengan trend arrow (↑ improving, → stable, ↓ declining)
+   - `AnimationController` + `CurvedAnimation` (1.5s, easeOutCubic)
+
+2. **`lib/presentation/pages/insights/widgets/insight_card.dart`**:
+   - Card: icon (correlation/anomaly/trend), title, description, confidence badge
+   - Read/unread indicator (bold vs regular)
+   - Tap → expand detail
+   - Bookmark toggle (isSaved)
+
+3. **`lib/presentation/pages/insights/widgets/correlation_heatmap.dart`** — CustomPainter:
+   - NxN grid of correlation cells
+   - Color: red (negative) ← white (zero) → blue (positive)
+   - Row/column labels (short variable names)
+   - Tap cell → show detail insight for that variable pair
+   - Pinch to zoom jika banyak variabel
+
+4. **`lib/presentation/pages/insights/insights_page.dart`** — Full implementation:
+   - Top: HealthScoreRing (prominent)
+   - Tab bar: "Insights" | "Heatmap" | "Timeline"
+   - "Insights" tab: ranked list of InsightCards
+   - "Heatmap" tab: CorrelationHeatmap
+   - "Timeline" tab: (placeholder dulu, atau simple date-based list) — symptom timeline CustomPainter bisa di Step 14 jika ada waktu
+   - **Empty state:** Jika < 14 hari data: progress bar "Journal X hari lagi untuk insight pertamamu!"
+   - **Loading state:** Shimmer saat analysis berjalan
+   - **Error state:** "Ada masalah saat analisis. Coba lagi?" + retry button
+
+**Verifikasi:** `flutter run` → navigate ke Insights tab → health score ring animates → insight cards appear → tap card expands. Heatmap renders dengan data korelasi.
+
+**Output step ini → input step berikutnya:** Fitur inti MedMind (journal + insights) sudah complete. Step 13-17 adalah polish, enhanced features, dan production prep.
+
+---
+
+### STEP 13: Export Pipeline (PDF + CSV)
+
+**Konteks:** User sudah punya data journal dan insights. Sekarang bangun cara export data — penting untuk user yang mau share ke dokter, dan untuk portfolio showcase.
+
+**Dependency dari Step 8 & 11:** Journal entries dan insight reports tersedia.
+
+**Sub-tasks:**
+
+1. **Tambahkan di pubspec.yaml:**
+
+   ```yaml
+   pdf: ^3.10.x
+   printing: ^5.12.x
+   share_plus: ^10.x.x
+   ```
+
+2. **Buat `lib/data/datasources/local/pdf_generator.dart`**:
+   - `generatePdf({period, entries, insights})` → `Uint8List` (PDF bytes)
+   - Sections: summary, symptom frequency table, medication compliance, sleep analysis, top insights, correlation summary
+   - Layout: professional multi-page report
+
+3. **Buat `lib/data/datasources/local/csv_exporter.dart`**:
+   - `exportEntries(entries)` → String (CSV content)
+   - Columns: date, mood, mood_intensity, per-symptom severity, sleep_hours, sleep_quality, per-medication taken, per-lifestyle value
+
+4. **Implement `lib/presentation/pages/settings/export_page.dart`**:
+   - Date range picker (last 30, 90 days, custom)
+   - Format picker (PDF / CSV)
+   - Generate button → loading → share via `share_plus`
+
+**Verifikasi:** Generate PDF → open → verify content. Generate CSV → open in spreadsheet → verify columns and data.
+
+**Output step ini → input step berikutnya:** Export fungsional. App sudah MVP-worthy. Langkah selanjutnya = Health Connect (enhancement) atau ML (enhancement).
+
+---
+
+### STEP 14: Health Connect Integration (Platform Channel)
+
+**Konteks:** Enhancement feature. Android Health Connect bisa auto-import sleep & step data ke journal. Dependency `androidx.health.connect:connect-client` sudah di `android/app/build.gradle.kts`.
+
+**Dependency dari Step 8:** Journal flow sudah berfungsi untuk menerima imported data.
+
+**Sub-tasks:**
+
+1. **Android manifest:** Tambahkan permissions `READ_SLEEP`, `READ_STEPS`, `READ_HEART_RATE`
+
+2. **Buat `android/app/src/main/kotlin/.../health_connect/HealthConnectPlugin.kt`**:
+   - `isAvailable()` → cek Health Connect terinstal
+   - `requestPermissions()` → request data access
+   - `readSleepSessions(startTime, endTime)` → List<Map> sleep data
+   - `readSteps(startTime, endTime)` → step count
+   - Error handling: try/catch semua Health Connect calls
+
+3. **Implement `lib/platform/health_connect_channel.dart`**:
+   - MethodChannel `com.yourblooo.medmind/health_connect`
+   - Dart methods mirror Kotlin: `isAvailable()`, `requestPermissions()`, `readSleepSessions()`, `readSteps()`
+
+4. **Implement `lib/data/repositories/health_connect_repository_impl.dart`**:
+   - Wrap channel calls dengan error handling → `Either<Failure, T>`
+   - When HC not available → return gracefully, don't crash
+
+5. **Implement settings page `health_connect_settings_page.dart`**:
+   - Toggle on/off
+   - Connection status
+   - Data types being synced
+   - Last sync timestamp
+
+6. **Auto-import in journal flow:** Saat user buka new journal entry → jika HC enabled, pre-fill sleep data dari Health Connect (user can override)
+
+**Verifikasi:** Test pada device dengan Health Connect installed. Import sleep data → muncul di journal form.
+
+---
+
+### STEP 15: ML Model Training + TFLite Integration
+
+**Konteks:** Enhancement. ML model untuk NLP symptom extraction dari free text dan anomaly detection. Pure statistical engine (Step 10) sudah berfungsi — ML adalah lapisan tambahan.
+
+**Dependency dari Step 10:** Insight engine berfungsi. ML fallback strategy: kalau ML gagal, statistical methods tetap berjalan.
+
+**Sub-tasks:**
+
+1. **Python side (ml/notebooks/):**
+   - Train NLP symptom extraction model (rule-based + small classifier → TFLite, ~500KB)
+   - Train anomaly detection model (Isolation Forest → TFLite, ~1MB)
+   - Export ke `ml/models/*.tflite`
+
+2. **Tambahkan `tflite_flutter: ^0.10.x` di pubspec.yaml dan asset paths di flutter section**
+
+3. **Implement `lib/data/datasources/ml/tflite_engine.dart`**:
+   - Load model from assets
+   - `runInference(List<double> input)` → `List<double>` output
+   - Dispose on lifecycle change
+
+4. **Implement `lib/data/datasources/ml/symptom_classifier.dart`**:
+   - Tokenize free text → vector → TFLite inference → extract symptoms
+   - Rule-based fallback: keyword dictionary (ID + EN) for when ML confidence low
+
+5. **Implement `lib/data/datasources/ml/anomaly_model.dart`**:
+   - Daily feature vector → anomaly score (0-1)
+   - Complement statistical Z-score detector
+
+6. **Implement `lib/data/datasources/ml/isolate_pool_manager.dart`**:
+   - Run inference in separate isolate (don't block UI)
+   - Manage model lifecycle (load lazy, dispose on background)
+
+7. **Implement `lib/data/repositories/ml_repository_impl.dart`** — Replace stubs with real implementations:
+   - `extractSymptomsFromText()` → ML-first, rule-based fallback
+   - `predictAnomaly()` → ML score as additional signal
+
+8. **Wire into journal save flow:**
+   - After save → background: run NLP on free text
+   - High confidence (>0.85): auto-add extracted symptoms
+   - Medium confidence (0.5-0.85): show suggestion dialog
+   - Low confidence (<0.5): skip
+
+**Verifikasi:** ML inference < 500ms. NLP extracts "sakit kepala" → "headache" with confidence > 0.6. Fallback works when model is unavailable.
+
+---
+
+### STEP 16: Comprehensive Testing + Settings Pages
+
+**Konteks:** Core fitur sudah jalan. Sekarang stabilkan dengan testing menyeluruh dan lengkapi settings pages yang masih kosong.
+
+**Sub-tasks:**
+
+1. **Implement `lib/presentation/pages/settings/secutiry_settings_page.dart`**:
+   - Toggle biometric lock
+   - Change PIN (kalau pakai PIN fallback)
+   - "Delete all data" button (dengan double confirmation + destroy encryption key)
+
+2. **Unit tests (minimal 20):**
+   - Correlation engine: semua 4 metode × 3 skenario = 12 tests
+   - Anomaly detector: 3 tests
+   - Data preparation service: 3 tests
+   - Mapper round-trip: 2 tests
+
+3. **Widget tests (minimal 10):**
+   - Mood picker, symptom selector, sleep input, medication input, lifestyle input
+   - Journal entry page: submit flow
+   - Journal list page: empty state, card display
+   - Insights page: score ring, insight cards
+   - Onboarding flow
+
+4. **Integration tests (minimal 3):**
+   - Full journal CRUD cycle
+   - 30 entries → insight generation → verify insights
+   - Export: entries → PDF → verify generated
+
+5. **CI/CD Pipeline** — Buat `.github/workflows/ci.yml`:
+   - analyze → test → build APK
+   - Trigger on push to develop/main
+
+**Verifikasi:** `flutter test` → all green. `flutter analyze` → 0 warnings. CI pipeline runs successfully.
+
+---
+
+### STEP 17: Production Polish & Play Store
+
+**Konteks:** Fitur lengkap, tests passing. Final polish untuk production release.
+
+**Sub-tasks:**
+
+1. **Error monitoring:** Tambahkan `sentry_flutter`, setup PII scrubbing (JANGAN kirim health data ke Sentry)
+2. **Performance:**
+   - App size audit: `flutter build apk --analyze-size` (target < 30MB)
+   - Cold start profiling (target < 3s)
+   - Lazy-load TFLite models (bukan startup)
+3. **App icon & splash screen:** Pakai `flutter_launcher_icons` + `flutter_native_splash`
+4. **Store listing:** Screenshots, description, privacy policy
+5. **App signing:** Generate keystore, configure `build.gradle` signing config
+6. **Release build:** `flutter build appbundle --release`
+7. **Internal testing:** Upload ke Play Store internal testing track, test di 3+ devices
+8. **Fix issues found** → merge develop → main → tag v1.0.0 → publish
+
+---
+
+### 🗺️ Dependency Flow Antar Steps
+
+```
+Step 1 (Utils/Errors)
+  ↓
+Step 2 (DI Container)
+  ↓
+Step 3 (Isar + Enkripsi + Models)
+  ↓
+Step 4 (Mappers + DataSources + Repo Impls)  ←── Ini BLOCKER terbesar saat ini
+  ↓
+Step 5 (Riverpod Providers)
+  ↓
+Step 6 (Onboarding Complete)
+  ↓
+Step 7 (Journal Form Widgets)
+  ↓
+Step 8 (Journal Pages + Save Flow)  ←── MVP minimum mulai dari sini
+  ↓
+Step 9 (Reminders)          Step 10 (Insight Engine)
+  ↓                            ↓
+  │                         Step 11 (Insight Caching + Providers)
+  │                            ↓
+  │                         Step 12 (Insights UI + Visualizations)
+  ↓                            ↓
+Step 13 (Export)    ←──────────┘
+  ↓
+Step 14 (Health Connect)     ← Enhancement, bisa parallel
+Step 15 (ML Integration)     ← Enhancement, bisa parallel
+  ↓
+Step 16 (Testing + Settings)
+  ↓
+Step 17 (Production)
+```
+
+**Critical path ke MVP:** Step 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 10 → 11 → 12 → 13
+**Nice to have:** Step 9, 14, 15 (bisa ditambahkan kapan saja setelah Step 8)
 
 ---
 
