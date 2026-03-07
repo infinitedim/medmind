@@ -1,52 +1,54 @@
-# MEDMIND — ML Requirements
-# Sesuai dengan 3 model: NLP Symptom, Anomaly Detection, Correlation
+# Framework utama untuk membangun, melatih, dan mengonversi model ke TFLite
+tensorflow==2.21.0
 
-# Core TensorFlow & TFLite
-# (sesuai tflite_flutter di pubspec)
-tensorflow==2.16.1
-tensorflow-lite-support==0.4.4
-flatbuffers==23.5.26
+# High-level API untuk membangun arsitektur model (diperlukan oleh TF 2.21.0)
+keras==3.13.2
 
-# NLP — nlp_symptom_v1.tflite
-# (untuk symptom_classifier.dart)
-transformers==4.40.0
-tokenizers==0.19.1
-datasets==2.19.0
-nltk==3.8.1
-sentence-transformers==3.0.0
-tf2onnx==1.16.1
+# Komputasi numerik: array operasi, matrix, preprocessing fitur tensor
+numpy==2.4.2
 
-# Anomaly Detection — anomaly_detection_v1.tflite
-# (untuk anomaly_model.dart)
-scikit-learn==1.4.2
-pyod==1.1.3
+# Manipulasi data tabular: mengolah data journal (symptom, sleep, mood) menjadi
+# training dataset berstruktur sebelum dimasukkan ke model
+pandas==3.0.1
 
-# Correlation — symptom_correlation_v1.tflite
-# (untuk correlation_model.dart)
-scipy==1.13.0
-statsmodels==0.14.2
-pingouin==0.5.4
+# Fungsi statistik: distribusi probabilitas, uji hipotesis, validasi hasil
+# korelasi dari CorrelationEngine (Pearson, Spearman, Chi-Square)
+scipy==1.17.1
 
-# Data Processing
-numpy==1.26.4
-pandas==2.2.2
-imbalanced-learn==0.12.2
 
-# Indonesian NLP Support
-PySastrawi==1.0.0
-indoNLP==0.3.0
+# -----------------------------------------------------------------------------
+# Machine Learning Algorithms
+# -----------------------------------------------------------------------------
 
-# Visualization & Notebook
-matplotlib==3.9.0
+# Isolation Forest untuk Anomaly Detection Model, TF-IDF Vectorizer untuk NLP
+# Symptom Classifier (Opsi A: rule-based + classifier), preprocessing pipeline
+scikit-learn==1.8.0
+
+# Serialisasi model scikit-learn dan eksekusi pipeline paralel saat training
+joblib==1.5.3
+
+# Tokenisasi teks bahasa Indonesia & Inggris, stopword removal, stemming —
+# preprocessing teks journal sebelum masuk ke TF-IDF symptom classifier
+nltk==3.9.3
+
+# Plot training loss, confusion matrix, distribusi data dalam notebook
+matplotlib==3.10.8
+
+# Visualisasi statistik: heatmap korelasi fitur, distribusi anomaly score
 seaborn==0.13.2
-jupyter==1.0.0
-ipywidgets==8.1.2
 
-# Model Export & Optimization
-onnx==1.16.0
-onnxruntime==1.18.0
+# IDE notebook interaktif untuk menjalankan ketiga training notebook:
+#   - anomaly_detection_training.ipynb
+#   - npl_symptom_extraction_training.ipynb
+#   - symptom_correlation_training.ipynb
+jupyterlab==4.5.5
 
-# Utilities
-tqdm==4.66.4
-python-dotenv==1.0.1
-huggingface-hub==0.23.2
+# Python kernel untuk JupyterLab agar notebook dapat mengeksekusi kode
+ipykernel==7.2.0
+
+# Progress bar saat iterasi training set besar dan proses konversi model
+tqdm==4.67.3
+
+# Format biner FlatBuffers — digunakan oleh TFLite untuk serialisasi model
+# (.tflite files), memastikan model yang dihasilkan dapat dibaca tflite_flutter
+flatbuffers==25.12.19
