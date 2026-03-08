@@ -4,7 +4,22 @@
 > Ditulis untuk developer yang akan mengerjakan sendiri (solo dev).
 >
 > **Terakhir diperbarui:** 8 Maret 2026
-> **Status Keseluruhan:** ~55% complete — Domain layer selesai, arsitektur & routing siap, Data layer foundation (Isar DB + AES-256-GCM enkripsi, 4 model @Collection + schemas, 3 local data sources, 2 mappers, DI container, 9 custom exceptions) selesai. Repository implementations (6 file) dan Riverpod providers belum diimplementasi.
+> **Status Keseluruhan:** ~40% complete — Domain layer 100%, Data layer ~65% (foundation selesai, 6 repository implementations kosong), Presentation layer ~5% (routing/theming/shell selesai, semua page stub), Insight Engine 0%, ML Integration 0%, Testing ~15% (14 test files ada, unit tests jalan, widget tests basic).
+>
+> **Breakdown per layer:**
+> | Layer | Progress | Detail |
+> |-------|----------|--------|
+> | Domain | 100% ✅ | 8 entities (Freezed), 6 repo interfaces, 16 use cases, 6 enums, failures, exceptions |
+> | Data (Models/Sources) | 100% ✅ | Isar DB + AES-256-GCM, 4 @Collection + schemas, 3 datasources (511 LOC), 2 mappers |
+> | Data (Repo Impls) | 0% ❌ | Semua 6 file kosong — **BLOCKER UTAMA** |
+> | Presentation (Shell) | 100% ✅ | GoRouter, bottom nav, theme (360 LOC), typography, color tokens |
+> | Presentation (Pages) | ~5% 🟡 | Hanya onboarding welcome selesai, sisanya stub |
+> | Presentation (Providers) | 0% ❌ | Folder kosong, Riverpod belum dipakai |
+> | Platform Channels | 100% ✅ | HealthConnectChannel (243 LOC), KeystoreChannel (193 LOC) |
+> | Testing | ~15% 🟡 | 14 test files, 6 unit + 4 widget + 2 integration (smoke) |
+> | DI Container | 95% 🟡 | Terkonfigurasi tapi `configureDependencies()` **belum dipanggil** di `main.dart` — BUG |
+> | Insight Engine | 0% ❌ | `insight_engine.dart` kosong |
+> | ML Integration | 0% ❌ | Semua file kosong, model `.tflite` 0 bytes |
 
 ---
 
@@ -1140,11 +1155,29 @@ jobs:
 - [ ] 🟡 Onboarding flow (3-4 screen) — _Hanya screen 1 (welcome) selesai. `SymptomSetupPage` parsial (progress "2 of 4", skeleton). Screen 3 & 4 belum ada._
 - [ ] ❌ Biometric lock (opsional)
 - [ ] ❌ CI/CD pipeline (GitHub Actions) — _Folder `.github/workflows/` belum ada._
-- [ ] ❌ Minimum 5 unit tests + 2 integration tests passing — _Belum ada test files._
+- [x] 🟡 Test infrastructure + basic tests — _14 test files ada: 3 test helpers (`mock_repositories.dart` dengan 6 mocks via mocktail, `pump_app.dart` dengan ProviderScope helper, `test_fixtures.dart` dengan factory methods), 5 unit tests (failures_test + 4 journal use case tests — create, delete, get, search, update), 4 widget tests (app_bottom_nav, home_page, journal_entry_page, journal_list_page — basic structural tests), 2 integration test skeletons (smoke test aktif, full CRUD flow di-comment). **Belum tercapai target 5 unit + 2 integration yang fully passing—widget tests hanya verifikasi render, belum behavioral.**_
 - [ ] ❌ `flutter analyze` 0 warnings — _Belum diverifikasi setelah semua perubahan._
 - [ ] ❌ Git: branch `feature/foundation-setup` merged ke `develop`
 
-> **Ringkasan Phase 1:** Domain layer (entities, repositories, use cases) 100% selesai. Arsitektur, routing, dan theming 100% selesai. Data layer foundation 100% selesai — Isar DB + AES-256-GCM enkripsi, 4 Isar @Collection models + 4 generated schemas, 3 local data sources (511 baris total), 2 mappers, 9 custom exceptions, DI container (GetIt + Injectable) semuanya sudah terimplementasi dan ter-wire. **Blocker sekarang:** 6 repository implementations (`_impl.dart`) masih kosong → Riverpod providers tidak bisa berfungsi → UI tidak bisa baca/tulis data. Plus: `date_utils.dart`, `logger.dart` kosong; onboarding screen 2-4 belum ada; biometric lock belum ada; 0 test files; tidak ada CI/CD pipeline.
+> **Ringkasan Phase 1:** Domain layer (entities, repositories, use cases) 100% selesai. Arsitektur, routing, dan theming 100% selesai. Data layer foundation 100% selesai — Isar DB + AES-256-GCM enkripsi, 4 Isar @Collection models + 4 generated schemas, 3 local data sources (511 baris total), 2 mappers, 9 custom exceptions, DI container (GetIt + Injectable) semuanya sudah terimplementasi dan ter-wire. Test infrastructure sudah ada (14 file: unit tests + widget tests + integration stubs + helpers + fixtures). **Blocker sekarang:** 6 repository implementations (`_impl.dart`) masih kosong → Riverpod providers tidak bisa berfungsi → UI tidak bisa baca/tulis data. Plus: `configureDependencies()` BELUM dipanggil di `main.dart` (DI container ter-define tapi tidak diinisialisasi saat runtime — BUG); `date_utils.dart`, `logger.dart` kosong; onboarding screen 2-4 belum ada; biometric lock belum ada; tidak ada CI/CD pipeline.
+>
+> **⚠️ Architectural Decisions yang Berbeda dari Plan Awal:**
+>
+> | #   | Plan Awal                                                     | Implementasi Aktual                                                                        | Alasan                                                                    |
+> | --- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+> | 1   | Isar `encryptionKey` param untuk DB-level encryption          | Field-level AES-256-GCM via `encrypt` package (`EncryptionHelper` di `isar_database.dart`) | `encryptionKey` param tidak tersedia di Isar 3.1.0+1                      |
+> | 2   | `isar_generator` via `build_runner` untuk generate schemas    | Isolated Flutter project via `tools/generate_isar_schemas.sh`                              | `isar_generator` 3.x konflik dengan `build_runner` modern                 |
+> | 3   | Model-specific enums terpisah dari domain enums               | Model pakai domain enums langsung (`Mood`, `SymptomCategory`, dll.)                        | Mengurangi boilerplate — mapper assignment langsung tanpa enum conversion |
+> | 4   | `mockito` + codegen untuk testing                             | `mocktail` (no codegen) — manual mock classes                                              | Lebih simpel, tidak butuh build_runner step tambahan                      |
+> | 5   | `EncryptionKeyManager` via `FlutterSecureStorage` saja        | Two-layer: Android Keystore HSM + FlutterSecureStorage (`KeystoreChannel`)                 | Keamanan lebih kuat dengan hardware-backed master key                     |
+> | 6   | Mapper pakai static methods (`JournalEntryMapper.toDomain()`) | Mapper pakai extension methods (`model.toDomain()`, `entity.toModel()`)                    | Lebih idiomatic Dart, chaining lebih natural                              |
+>
+> **⚠️ Known Issues/Bugs:**
+>
+> - `main.dart` TIDAK memanggil `configureDependencies()` — GetIt DI container tidak pernah diinisialisasi saat runtime
+> - File typo: `secutiry_settings_page.dart` (seharusnya `security`)
+> - File typo: `export_symtom_data.dart` (seharusnya `symptom`)
+> - `HealthConnectChannel.requestPermissions()` ditandai `NOT_SUPPORTED via MethodChannel` — perlu pendekatan berbeda (Activity result)
 
 ---
 
@@ -3042,9 +3075,9 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 ---
 
-### STEP 2: Setup Dependency Injection (GetIt + Injectable) — ✅ SELESAI
+### STEP 2: Setup Dependency Injection (GetIt + Injectable) — 🟡 95% SELESAI
 
-> **Status per 8 Maret 2026:** `injection.dart` ✅ `injection.config.dart` ✅ `main.dart` updated ✅. DI wires: KeystoreChannel, FlutterSecureStorage, Isar, JournalLocalDataSource, SymptomLocalDataSource, InsightCacheDataSource, HealthConnectChannel. Catatan: `core_providers.dart` (Riverpod bridge) belum dibuat — itu bagian dari STEP 5.
+> **Status per 8 Maret 2026:** `injection.dart` ✅ `injection.config.dart` ✅ `main.dart` ⚠️ **BELUM MEMANGGIL `configureDependencies()`** — DI container terdefinisi tapi tidak pernah diinisialisasi saat runtime. Ini adalah BUG yang harus diperbaiki sebelum lanjut. DI wires: KeystoreChannel, FlutterSecureStorage, Isar, JournalLocalDataSource, SymptomLocalDataSource, InsightCacheDataSource, HealthConnectChannel. Catatan: `core_providers.dart` (Riverpod bridge) belum dibuat — itu bagian dari STEP 5.
 
 **Konteks:** ~~`lib/core/di/injection.dart` kosong.~~ DI sudah terkonfigurasi lengkap. Package `get_it` dan `injectable` sudah ada di pubspec dan sudah di-wire.
 
