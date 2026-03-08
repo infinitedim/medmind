@@ -14,9 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HealthScore {
 
- DateTime get date; double get overallScore;// 0-100
- Map<String, double> get components;// breakdown per category
- ScoreTrend get trend;
+ DateTime get date; double get overallScore; Map<String, double> get components; ScoreTrend get trend;
 /// Create a copy of HealthScore
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -216,16 +214,13 @@ class _HealthScore implements HealthScore {
 
 @override final  DateTime date;
 @override final  double overallScore;
-// 0-100
  final  Map<String, double> _components;
-// 0-100
 @override Map<String, double> get components {
   if (_components is EqualUnmodifiableMapView) return _components;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_components);
 }
 
-// breakdown per category
 @override final  ScoreTrend trend;
 
 /// Create a copy of HealthScore

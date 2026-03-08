@@ -14,9 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CorrelationResult {
 
- String get variableA; String get variableB; double get correlationCoefficient;// -1.0 to 1.0
- double get pValue; int get sampleSize; int get lag;// 0 = same day, 1 = next day, etc.
- bool get isSignificant;
+ String get variableA; String get variableB; double get correlationCoefficient; double get pValue; int get sampleSize; int get lag; bool get isSignificant;
 /// Create a copy of CorrelationResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -220,11 +218,9 @@ class _CorrelationResult implements CorrelationResult {
 @override final  String variableA;
 @override final  String variableB;
 @override final  double correlationCoefficient;
-// -1.0 to 1.0
 @override final  double pValue;
 @override final  int sampleSize;
 @override final  int lag;
-// 0 = same day, 1 = next day, etc.
 @override final  bool isSignificant;
 
 /// Create a copy of CorrelationResult

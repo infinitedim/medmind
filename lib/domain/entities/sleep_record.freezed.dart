@@ -14,8 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SleepRecord {
 
- DateTime get bedTime; DateTime get wakeTime; int get quality;// 1-10
- int? get disturbances;
+ DateTime get bedTime; DateTime get wakeTime; int get quality; int? get disturbances;
 /// Create a copy of SleepRecord
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -216,7 +215,6 @@ class _SleepRecord extends SleepRecord {
 @override final  DateTime bedTime;
 @override final  DateTime wakeTime;
 @override final  int quality;
-// 1-10
 @override final  int? disturbances;
 
 /// Create a copy of SleepRecord

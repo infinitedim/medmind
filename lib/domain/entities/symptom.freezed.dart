@@ -283,10 +283,7 @@ as bool,
 /// @nodoc
 mixin _$SymptomLog {
 
- String get symptomId; int get severity;// 1-10
- TimeOfDay? get onset;// kapan mulai
- Duration? get duration;// berapa lama
- String? get notes;
+ String get symptomId; int get severity; TimeOfDay? get onset; Duration? get duration; String? get notes;
 /// Create a copy of SymptomLog
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -487,11 +484,8 @@ class _SymptomLog implements SymptomLog {
 
 @override final  String symptomId;
 @override final  int severity;
-// 1-10
 @override final  TimeOfDay? onset;
-// kapan mulai
 @override final  Duration? duration;
-// berapa lama
 @override final  String? notes;
 
 /// Create a copy of SymptomLog
@@ -558,10 +552,7 @@ as String?,
 /// @nodoc
 mixin _$ExtractedSymptom {
 
- String get symptomName; String? get severity;// mild, moderate, severe
- double get confidence;// 0.0 - 1.0
- String get sourceText;// potongan teks yang di-extract
- bool? get isConfirmedByUser;
+ String get symptomName; String? get severity; double get confidence; String get sourceText; bool? get isConfirmedByUser;
 /// Create a copy of ExtractedSymptom
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -762,11 +753,8 @@ class _ExtractedSymptom implements ExtractedSymptom {
 
 @override final  String symptomName;
 @override final  String? severity;
-// mild, moderate, severe
 @override final  double confidence;
-// 0.0 - 1.0
 @override final  String sourceText;
-// potongan teks yang di-extract
 @override final  bool? isConfirmedByUser;
 
 /// Create a copy of ExtractedSymptom

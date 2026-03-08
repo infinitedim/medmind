@@ -280,9 +280,7 @@ as String?,
 /// @nodoc
 mixin _$LifestyleFactorLog {
 
- String get factorId; bool? get boolValue;// untuk tipe boolean: "Consumed caffeine?"
- double? get numericValue;// untuk tipe numeric: "3 cups"
- int? get scaleValue;
+ String get factorId; bool? get boolValue; double? get numericValue; int? get scaleValue;
 /// Create a copy of LifestyleFactorLog
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -482,9 +480,7 @@ class _LifestyleFactorLog implements LifestyleFactorLog {
 
 @override final  String factorId;
 @override final  bool? boolValue;
-// untuk tipe boolean: "Consumed caffeine?"
 @override final  double? numericValue;
-// untuk tipe numeric: "3 cups"
 @override final  int? scaleValue;
 
 /// Create a copy of LifestyleFactorLog
