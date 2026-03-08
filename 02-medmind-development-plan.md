@@ -997,9 +997,9 @@ name: CI
 
 on:
   push:
-    branches: [develop, main]
+    branches: [development main]
   pull_request:
-    branches: [develop, main]
+    branches: [development main]
 
 jobs:
   analyze-and-test:
@@ -2032,7 +2032,7 @@ Ini di luar Flutter project, tapi essential. Kita perlu prepare model sebelum bi
      - Buat dictionary symptom keywords (Bahasa Indonesia + English)
      - Keyword matching + simple TF-IDF classifier untuk severity
      - Konversi ke TFLite model (~500KB)
-     - **Pro:** cepat develop, predictable behavior
+     - **Pro:** cepat development predictable behavior
      - **Kontra:** tidak sefleksibel BERT
    - **Opsi B: Fine-tuned MobileBERT**
      - Fine-tune MobileBERT pada medical symptom extraction task

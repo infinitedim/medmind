@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [develop, main]
+    branches: [development main]
   pull_request:
-    branches: [develop, main]
+    branches: [development main]
 
 jobs:
   analyze-and-test:
@@ -33,6 +33,13 @@ jobs:
         run: |
           # Install lcov
           sudo apt-get install -y lcov
+          # Remove generated files from coverage
+          lcov --remove coverage/lcov.info \
+            '**/*.g.dart' \
+            '**/*.freezed.dart' \
+            '**/*.gen.dart' \
+            'lib/generated/*' \
+            -o coverage/lcov.info
           # Generate coverage report
           genhtml coverage/lcov.info -o coverage/html
           # Check minimum coverage (Phase 1: 60%, akan dinaikkan bertahap)
