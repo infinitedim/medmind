@@ -2,12 +2,12 @@ name: ML Pipeline
 
 on:
   push:
-    branches: [development main]
+    branches: [development, main]
     paths:
       - "ml/**"
       - ".github/workflows/ml.yml"
   pull_request:
-    branches: [development main]
+    branches: [development, main]
     paths:
       - "ml/**"
       - ".github/workflows/ml.yml"
@@ -169,7 +169,7 @@ jobs:
               sys.exit(1)
           EOF
 
-  # Job ini hanya berjalan di push ke main/develop (bukan PR)
+  # Job ini hanya berjalan di push ke main/development (bukan PR)
   # untuk memastikan model di-commit sudah sinkron dengan assets Flutter
   sync-models-check:
     name: Check Models Synced to Flutter Assets
