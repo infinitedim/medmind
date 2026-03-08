@@ -3,15 +3,15 @@
 > Dokumen ini adalah panduan langkah-demi-langkah untuk membangun MedMind dari nol sampai siap rilis di Play Store.
 > Ditulis untuk developer yang akan mengerjakan sendiri (solo dev).
 >
-> **Terakhir diperbarui:** 6 Maret 2026
-> **Status Keseluruhan:** ~30-35% complete — Domain layer selesai, arsitektur & routing siap, tapi Data layer dan sebagian besar Presentation layer belum diimplementasi.
+> **Terakhir diperbarui:** 8 Maret 2026
+> **Status Keseluruhan:** ~55% complete — Domain layer selesai, arsitektur & routing siap, Data layer foundation (Isar DB + AES-256-GCM enkripsi, 4 model @Collection + schemas, 3 local data sources, 2 mappers, DI container, 9 custom exceptions) selesai. Repository implementations (6 file) dan Riverpod providers belum diimplementasi.
 
 ---
 
 ## Daftar Isi
 
 1. [Gambaran Arsitektur & Struktur Folder](#1-gambaran-arsitektur--struktur-folder)
-2. [Phase 1: Foundation (Minggu 1–2)](#phase-1-foundation-minggu-12) — 🟡 ~60% selesai
+2. [Phase 1: Foundation (Minggu 1–2)](#phase-1-foundation-minggu-12) — 🟡 ~80% selesai
 3. [Phase 2: Smart Journaling (Minggu 3–4)](#phase-2-smart-journaling-minggu-34) — ❌ Belum dimulai
 4. [Phase 3: Statistical Engine (Minggu 5–6)](#phase-3-statistical-engine-minggu-56) — ❌ Belum dimulai
 5. [Phase 4: ML Integration (Minggu 7–9)](#phase-4-ml-integration-minggu-79) — ❌ Belum dimulai
@@ -1126,15 +1126,17 @@ jobs:
 - [x] Onboarding page (screen 1) ✅ _Selesai — Brain icon, feature pills (On-device AI, 100% Private, Offline-first), CTA buttons. Desain profesional._
 - [x] Android build config ✅ _Selesai — minSdk 26, Health Connect client 1.1.0-rc01, kotlinx-coroutines-android_
 - [x] Dependencies di pubspec.yaml ✅ _Selesai — flutter_riverpod, isar, freezed, get_it, injectable, go_router, flutter_secure_storage, encrypt, dartz, google_fonts, lucide_icons, flutter_animate, dll._
-- [ ] ❌ Isar database setup dengan enkripsi AES-256 — _File `isar_database.dart` dan semua local datasource files KOSONG. Isar ada di pubspec tapi belum dipakai._
-- [ ] ❌ Encryption key management via Android Keystore — _File `keystore_channel.dart` KOSONG. `flutter_secure_storage` ada di pubspec tapi belum dipakai._
-- [ ] ❌ DI container (GetIt + Injectable) terkonfigurasi — _File `injection.dart` KOSONG. `get_it` dan `injectable` ada di pubspec tapi belum di-wire._
-- [ ] ❌ Riverpod providers bridge ke use cases — _Tidak ada providers yang terdefinisi. Riverpod hanya sebatas ProviderScope di main.dart._
-- [ ] ❌ Data Models (Isar Collection) — _File `medication_model.dart` dan `symptom_model.dart` KOSONG. Belum ada Isar schema/collection._
-- [ ] ❌ Mappers (Entity ↔ Model) — _File `journal_entry_mapper.dart` dan `symptom_mapper.dart` KOSONG._
-- [ ] ❌ Repository implementation + integration tests — _Semua 6 file `_\_repository_impl.dart` KOSONG.\*
-- [ ] ❌ Local data sources — _`journal_local_datasource.dart`, `symptom_local_datasource.dart`, `insight_cache_datasource.dart` semua KOSONG._
-- [ ] ❌ Core utilities — _`date_utils.dart`, `logger.dart`, `exceptions.dart` semua KOSONG._
+- [x] ✅ Isar database setup dengan enkripsi AES-256-GCM field-level — _`isar_database.dart` (142 baris): `IsarDatabase.open(KeystoreChannel)` inisialisasi Isar dengan 4 schemas. `EncryptionHelper` wrap `encrypt` package — format `"<iv_base64>:<ciphertext_base64>"`. Catatan: enkripsi field-level (bukan `encryptionKey` Isar param — tidak tersedia di Isar 3.1.0+1)._
+- [x] ✅ Isar schema generation tooling — _`tools/generate_isar_schemas.sh`: script isolated Flutter project untuk generate .g.dart tanpa konflik toolchain. Diperlukan karena `isar_generator` 3.x konflik dengan build_runner modern. Semua 4 `.g.dart` sudah di-commit. Regenerate setiap kali model fields berubah._
+- [x] ✅ Encryption key management via Android Keystore — _`platform/keystore_channel.dart` fully implemented: two-layer key management (Android Keystore HSM + FlutterSecureStorage). Ter-register di DI container via `AppModule` (`@preResolve @lazySingleton Future<Isar> isar(KeystoreChannel)`)._
+- [x] ✅ DI container (GetIt + Injectable) terkonfigurasi — _`injection.dart`: `@InjectableInit`, `configureDependencies()`, `AppModule` register `FlutterSecureStorage` + `Isar` (via `@preResolve`). `injection.config.dart` auto-generated: wires KeystoreChannel, FlutterSecureStorage, Isar, JournalLocalDataSource, SymptomLocalDataSource, InsightCacheDataSource, HealthConnectChannel._
+- [ ] ❌ Riverpod providers bridge ke use cases — _`lib/presentation/providers/` directory ada tapi KOSONG. Riverpod hanya sebatas ProviderScope di main.dart. Ini blocker untuk Phase 2 UI._
+- [x] ✅ Data Models (4 Isar @Collection + 4 generated schemas) — _`journal_entry_model.dart`: 5 `@Embedded` classes (SymptomLogEmbed, MedicationLogEmbed, SleepRecordEmbed, LifestyleFactorLogEmbed, ExtractedSymptomEmbed) + `@Collection JournalEntryModel`. `symptom_model.dart`, `medication_model.dart`, `insight_model.dart` semuanya implemented. Penting: model pakai domain enums langsung (`Mood`, `ActivityLevel`, `SymptomCategory`, `InsightType`) — tidak ada model-specific enum. Semua 4 `.g.dart` ter-generate via tools/generate_isar_schemas.sh._
+- [x] ✅ Mappers (Entity ↔ Model) — _`journal_entry_mapper.dart`: bidirectional extensions JournalEntryModel↔JournalEntry + semua embedded object mappers. `symptom_mapper.dart`: bidirectional SymptomModel↔Symptom. Tidak ada enum conversion — karena model langsung pakai domain types, mapper assignment langsung (no boilerplate)._
+- [ ] ❌ Repository implementation + integration tests — _Semua 6 file `_repository_impl.dart` KOSONG: journal, symptom, insight, ml, health_connect, user_preferences. Ini blocker langsung sebelum Riverpod providers bisa berfungsi._
+- [x] ✅ Local data sources (3 datasources, total 511 baris) — _`journal_local_datasource.dart` (134 baris): full CRUD + watch stream + search + getByDateRange + count. `symptom_local_datasource.dart` (101 baris): CRUD + getByCategory(`SymptomCategory`) + getCustomSymptoms. `insight_cache_datasource.dart` (134 baris): CRUD + getUnread + getSaved + getByType(`InsightType`) + markAsRead + toggleSaved + evictOlderThan(days). Semua `@lazySingleton`._
+- [x] ✅ Custom exceptions (9 tipe) — _`exceptions.dart`: `AppException` base + `DatabaseException`, `RecordNotFoundException`, `KeystoreException`, `MlInferenceException`, `ModelLoadException`, `HealthConnectUnavailableException`, `HealthConnectPermissionException`, `NetworkException`, `ServerException`, `CacheException`. Siap di-throw dari data layer dan di-catch di repository layer._
+- [ ] ❌ Core utilities — _`date_utils.dart` dan `logger.dart` masih KOSONG. Ini dibutuhkan oleh data preparation service (Phase 3) dan journal list UI (Phase 2)._
 - [ ] 🟡 Onboarding flow (3-4 screen) — _Hanya screen 1 (welcome) selesai. `SymptomSetupPage` parsial (progress "2 of 4", skeleton). Screen 3 & 4 belum ada._
 - [ ] ❌ Biometric lock (opsional)
 - [ ] ❌ CI/CD pipeline (GitHub Actions) — _Folder `.github/workflows/` belum ada._
@@ -1142,7 +1144,7 @@ jobs:
 - [ ] ❌ `flutter analyze` 0 warnings — _Belum diverifikasi setelah semua perubahan._
 - [ ] ❌ Git: branch `feature/foundation-setup` merged ke `develop`
 
-> **Ringkasan Phase 1:** Domain layer (entities, repositories, use cases) 100% selesai. Arsitektur, routing, dan theming 100% selesai. Tapi Data layer (database, data sources, implementasi repository, DI) 0% — ini jadi blocker utama sebelum bisa lanjut ke Phase 2.
+> **Ringkasan Phase 1:** Domain layer (entities, repositories, use cases) 100% selesai. Arsitektur, routing, dan theming 100% selesai. Data layer foundation 100% selesai — Isar DB + AES-256-GCM enkripsi, 4 Isar @Collection models + 4 generated schemas, 3 local data sources (511 baris total), 2 mappers, 9 custom exceptions, DI container (GetIt + Injectable) semuanya sudah terimplementasi dan ter-wire. **Blocker sekarang:** 6 repository implementations (`_impl.dart`) masih kosong → Riverpod providers tidak bisa berfungsi → UI tidak bisa baca/tulis data. Plus: `date_utils.dart`, `logger.dart` kosong; onboarding screen 2-4 belum ada; biometric lock belum ada; 0 test files; tidak ada CI/CD pipeline.
 
 ---
 
@@ -3000,15 +3002,18 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 ## 📍 LANGKAH SELANJUTNYA — Action Plan Detail
 
-> Berdasarkan analisis codebase per 6 Maret 2026:
+> Berdasarkan analisis codebase per 8 Maret 2026:
 >
-> - **Yang sudah selesai:** Domain layer lengkap (entities, repositories, use cases), arsitektur/routing/theming, onboarding screen 1
-> - **Bottleneck utama:** Data layer belum ada sama sekali — tidak ada database, tidak ada persistence, tidak ada DI wiring
+> - **Yang sudah selesai:** Domain layer lengkap (entities, repositories interfaces, use cases), arsitektur/routing/theming, onboarding screen 1. **BARU:** Data layer foundation lengkap — Isar DB + AES-256-GCM enkripsi (`isar_database.dart`), 4 Isar @Collection models + schemas (via `tools/generate_isar_schemas.sh`), 3 local data sources (511 baris), 2 mappers, 9 custom exceptions, DI container (`injection.dart` + `injection.config.dart`).
+> - **Bottleneck utama saat ini:** 6 repository implementations (`_impl.dart`) masih kosong → use cases tidak bisa dieksekusi → Riverpod providers tidak bisa berfungsi → UI buta data
+> - **Catatan arsitektur:** Model Isar menggunakan domain enums langsung (`Mood`, `SymptomCategory`, `InsightType`, `ActivityLevel`) — tidak ada model-specific enum. Mapper assignment langsung tanpa konversi.
 > - **Prinsip:** Setiap step di bawah menghasilkan sesuatu yang bisa dijalankan dan diverifikasi sebelum lanjut ke step berikutnya.
 
-### STEP 1: Selesaikan Core Utilities & Error Handling
+### STEP 1: Selesaikan Core Utilities & Error Handling — 🟡 SEBAGIAN SELESAI
 
-**Konteks:** File-file utility dasar (`logger.dart`, `date_utils.dart`, `exceptions.dart`) saat ini kosong. Ini dibutuhkan oleh hampir semua layer di atasnya — data sources perlu logging, repository implementation perlu exception handling, presentation perlu date formatting.
+> **Status per 8 Maret 2026:** `exceptions.dart` ✅ selesai (9 typed exceptions). `date_utils.dart` ❌ masih kosong. `logger.dart` ❌ masih kosong. Prioritaskan date_utils dan logger sebelum lanjut ke STEP 4.
+
+**Konteks:** File-file utility dasar (`logger.dart`, `date_utils.dart`, `exceptions.dart`) — `exceptions.dart` sudah selesai, tapi `date_utils.dart` dan `logger.dart` masih kosong. Ini dibutuhkan oleh hampir semua layer di atasnya — data sources perlu logging, repository implementation perlu exception handling, presentation perlu date formatting.
 
 **Sub-tasks:**
 
@@ -3037,9 +3042,11 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 ---
 
-### STEP 2: Setup Dependency Injection (GetIt + Injectable)
+### STEP 2: Setup Dependency Injection (GetIt + Injectable) — ✅ SELESAI
 
-**Konteks:** `lib/core/di/injection.dart` kosong. Package `get_it` dan `injectable` sudah ada di pubspec. Tanpa DI, tidak ada cara menghubungkan use case → repository → data source. Ini dependency paling kritis sebelum bisa mulai implementasi data layer.
+> **Status per 8 Maret 2026:** `injection.dart` ✅ `injection.config.dart` ✅ `main.dart` updated ✅. DI wires: KeystoreChannel, FlutterSecureStorage, Isar, JournalLocalDataSource, SymptomLocalDataSource, InsightCacheDataSource, HealthConnectChannel. Catatan: `core_providers.dart` (Riverpod bridge) belum dibuat — itu bagian dari STEP 5.
+
+**Konteks:** ~~`lib/core/di/injection.dart` kosong.~~ DI sudah terkonfigurasi lengkap. Package `get_it` dan `injectable` sudah ada di pubspec dan sudah di-wire.
 
 **Sub-tasks:**
 
@@ -3077,11 +3084,13 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 ---
 
-### STEP 3: Implementasi Isar Database + Enkripsi + Data Models
+### STEP 3: Implementasi Isar Database + Enkripsi + Data Models — ✅ SELESAI
 
-**Konteks:** Isar sudah di pubspec (`isar: ^2.1.4`, `isar_flutter_libs`). Tapi belum ada schema, belum ada database initialization, belum ada enkripsi. Step 2 sudah menyiapkan DI container — sekarang kita isi dengan database instance.
+> **Status per 8 Maret 2026:** Semua sub-tasks selesai. `isar_database.dart` (142 baris, AES-256-GCM field-level encryption). 4 Isar @Collection models + 4 `.g.dart` schemas (di-generate via `tools/generate_isar_schemas.sh` — isolated project karena isar_generator 3.x konflik toolchain). 3 local datasources (511 baris total). 2 mappers. `keystore_channel.dart` sudah pre-exist dan ter-wire ke DI. Catatan penting: model pakai domain enums langsung — tidak ada model-specific enums.
 
-**Dependency dari Step 2:** DI container (`getIt`) sudah aktif. Logger dari Step 1 tersedia untuk error logging.
+**Konteks:** ~~Isar sudah di pubspec tapi belum ada schema.~~ SELESAI. `isar_database.dart`, semua models, semua datasources, dan semua mappers sudah terimplementasi.
+
+**Dependency dari Step 2:** ✅ DI container sudah aktif.
 
 **Sub-tasks:**
 
@@ -3124,11 +3133,13 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 ---
 
-### STEP 4: Implementasi Mappers + Data Sources + Repository Implementations
+### STEP 4: Implementasi Mappers + Data Sources + Repository Implementations — 🟡 SEBAGIAN SELESAI
 
-**Konteks:** Sekarang kita punya: domain entities (Step 0, sudah selesai), Isar models (Step 3), DI container (Step 2). Yang kurang adalah "lem" yang menghubungkan semua layer — mappers, data sources, dan repository implementations.
+> **Status per 8 Maret 2026:** Mappers ✅ selesai (journal_entry_mapper, symptom_mapper). Data Sources ✅ selesai (journal, symptom, insight_cache — 511 baris total). **Repository Implementations ❌ semua 6 file kosong** — ini yang perlu dikerjakan sekarang.
 
-**Dependency dari Step 3:** Isar instance terenkripsi sudah aktif dan ter-register di GetIt. Model schemas ter-generate.
+**Konteks:** Mappers dan data sources sudah selesai. Yang tersisa adalah 6 repository implementations yang menghubungkan use cases (domain) dengan data sources (data layer).
+
+**Dependency dari Step 3:** ✅ Isar instance terenkripsi aktif dan ter-register di GetIt. Model schemas ter-generate. ✅ Mappers sudah tersedia. ✅ Data sources sudah ter-register di DI.
 
 **Sub-tasks (kerjakan berurutan karena saling tergantung):**
 
