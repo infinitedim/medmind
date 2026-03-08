@@ -12,9 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: subosito/flutter-action@v2.14.0
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.27.x" # Pin versi Flutter
           channel: "stable"
           cache: true
 
@@ -49,9 +48,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: subosito/flutter-action@v2.14.0
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.27.x"
           channel: "stable"
           cache: true
 
