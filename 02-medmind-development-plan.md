@@ -3,7 +3,7 @@
 > Dokumen ini adalah panduan langkah-demi-langkah untuk membangun MedMind dari nol sampai siap rilis di Play Store.
 > Ditulis untuk developer yang akan mengerjakan sendiri (solo dev).
 >
-> **Terakhir diperbarui:** 8 Maret 2026
+> **Terakhir diperbarui:** 10 Maret 2026
 > **Status Keseluruhan:** ~40% complete — Domain layer 100%, Data layer ~65% (foundation selesai, 6 repository implementations kosong), Presentation layer ~5% (routing/theming/shell selesai, semua page stub), Insight Engine 0%, ML Integration 0%, Testing ~15% (14 test files ada, unit tests jalan, widget tests basic).
 >
 > **Breakdown per layer:**
@@ -186,6 +186,7 @@ lib/
 │   │   │       ├── mood_picker.dart
 │   │   │       ├── sleep_input.dart
 │   │   │       ├── medication_input.dart
+│   │   │       ├── vitals_input.dart
 │   │   │       └── free_text_input.dart
 │   │   │
 │   │   ├── insights/
@@ -404,6 +405,7 @@ Buat semua entity di `lib/domain/entities/`. Ini adalah "bahasa" dari aplikasi k
    - symptoms: List<SymptomLog>
    - medications: List<MedicationLog>
    - sleepRecord: SleepRecord?
+   - vitalRecord: VitalRecord? (data vital harian — lihat entity #13)
    - lifestyleFactors: List<LifestyleFactorLog>
    - freeText: String? (catatan bebas)
    - extractedSymptoms: List<ExtractedSymptom>? (hasil NLP, nullable karena async)
@@ -533,6 +535,25 @@ Buat semua entity di `lib/domain/entities/`. Ini adalah "bahasa" dari aplikasi k
     - sourceText: String (potongan teks yang di-extract)
     - isConfirmedByUser: bool?
     ```
+
+13. **`VitalRecord`** — data vital harian (dari Health Connect atau input manual)
+
+    ```
+    Fields:
+    - heartRate: int? (rata-rata bpm — derivasi dari readHeartRate() samples;
+                       iterasi berikutnya bisa tambah heartRateMin + heartRateMax)
+    - steps: int? (total langkah hari ini — dari readSteps() atau input manual)
+    - weight: double? (berat badan dalam kg — manual input saja;
+                       readWeight() belum ada di HealthConnectChannel)
+    - spO2: double? (saturasi oksigen % — manual input saja;
+                     readSpO2() belum ada di HealthConnectChannel)
+    - date: DateTime (tanggal pencatatan vital)
+    - source: VitalSource (enum: manual, healthConnect)
+    ```
+
+    Tambahkan `VitalSource` enum ke `lib/core/enum/enum_collection.dart`.
+    Catatan: weight dan spO2 hanya bisa ditambahkan via manual input untuk saat ini.
+    Semua fields nullable — entity tetap valid meski hanya sebagian fields terisi.
 
 **Cara buat tiap entity:**
 
@@ -1128,7 +1149,7 @@ jobs:
 
 - [x] Project Flutter bisa `flutter run` tanpa error ✅ _Selesai — project berjalan, SDK ^3.11.0, main.dart → ProviderScope → MedMindApp_
 - [x] Folder structure Clean Architecture lengkap ✅ _Selesai — lib/app, core, domain, data, presentation, platform semua sudah ada_
-- [x] Semua domain entity (12 entity) ter-generate dengan Freezed ✅ _Selesai — JournalEntry, Symptom (+ SymptomLog + ExtractedSymptom), Medication (+ MedicationLog), SleepRecord, LifestyleFactor (+ LifestyleFactorLog), Insight, CorrelationResult, HealthScore. Semua file `.freezed.dart` ter-generate._
+- [ ] 🟡 Semua domain entity (13 entity) ter-generate dengan Freezed — _12 entity sudah selesai: JournalEntry, Symptom (+ SymptomLog + ExtractedSymptom), Medication (+ MedicationLog), SleepRecord, LifestyleFactor (+ LifestyleFactorLog), Insight, CorrelationResult, HealthScore. Semua `.freezed.dart` ter-generate. **Perlu ditambahkan:** `VitalRecord` entity (#13) + `VitalSource` enum + field `vitalRecord: VitalRecord?` di JournalEntry — sesuai perubahan Phase 2._
 - [x] Repository interfaces terdefinisi ✅ _Selesai — 6 abstract class: JournalRepository, SymptomRepository, InsightRepository, MlRepository, HealthConnectRepository, UserPreferencesRepository_
 - [x] CRUD use cases terdefinisi ✅ _Selesai — 16 use cases: 5 Journal, 4 Insight, 2 ML, 3 Health Connect, 2 Export_
 - [x] Enum collections ✅ _Selesai — Mood, ActivityLevel, SymptomCategory, FactorType, InsightType, ScoreTrend di `enum_collection.dart`_
@@ -1257,13 +1278,22 @@ jobs:
      - **Scale**: slider 1-10 ("Stress level")
    - Grouped by category (food, activity, mood triggers)
 
-4. **Free Text Input**
+4. **Vitals Input widget** (`lib/presentation/widgets/journal/vitals_input.dart`)
+   - Tampilkan 4 metric: Heart Rate, Steps, Weight, SpO₂
+   - Per-metric: import button (jika Health Connect tersedia) + manual input fallback
+   - Import via `HealthConnectChannel.readHeartRate()` dan `readSteps()`
+   - Weight dan SpO₂: manual input only (readWeight/readSpO2 belum ada di channel)
+   - Import banner atas: "Import all from Health Connect" — hanya muncul jika `isAvailable() == true`
+   - Semua fields opsional — form tetap bisa di-save tanpa vitals
+   - State: `journalFormNotifier.updateVitals(VitalRecord)`
+
+5. **Free Text Input**
    - Multi-line text field untuk catatan bebas
    - Placeholder: "How are you feeling today? Any triggers you noticed?"
    - Word count indicator
    - Nanti di Phase 4, text ini akan diproses NLP
 
-**Deliverable:** Form entry lengkap. User bisa log semua aspek kesehatan.
+**Deliverable:** Form entry lengkap. User bisa log semua aspek kesehatan termasuk vital signs.
 
 #### Hari 13–14: Journal Entry Page Assembly & Save Flow
 
@@ -1273,7 +1303,9 @@ jobs:
    - Tab atau accordion layout:
      - Tab 1: Mood + Symptoms (paling penting, default tab)
      - Tab 2: Sleep + Medications
-     - Tab 3: Lifestyle + Notes
+     - Tab 3: Vitals (Health Connect import + manual fallback)
+     - Tab 4: Lifestyle + Notes
+   - `TabController` length = 4, `vsync: this` (via `TickerProviderStateMixin`)
    - **Auto-save draft**: setiap 30 detik, simpan draft ke Isar (status: draft)
    - **Submit tombol**: validasi → save ke Isar (status: completed) → navigate kembali ke list
    - **Unsaved changes guard**: kalau user back tanpa save, tampilkan dialog "Simpan sebagai draft?"
@@ -1479,24 +1511,28 @@ workmanager: ^0.5.x # Untuk background scheduling
 
 ### Checklist Akhir Phase 2
 
+- [ ] ❌ **Splash screen** (`SplashPage`) — handle biometric auth check, enkripsi init (`KeystoreChannel.getOrCreateKey()`), dan routing ke onboarding (user baru) atau home (user returning). Tambah `RouteNames.splash` + `authenticateWithBiometrics()` ke `KeystoreChannel`. Berbeda dari `flutter_native_splash` di Step 17.
+- [ ] ❌ `VitalRecord` entity (#13) + `VitalSource` enum + `vitalRecord` field di `JournalEntry` — _Perlu dibuat di domain layer sebelum membangun `VitalsInput` widget._
 - [ ] ❌ Mood picker dengan intensity slider — _Tidak ada widget di `presentation/widgets/`. `JournalEntryPage` hanya punya conditional logic New/Edit, belum ada form._
 - [ ] ❌ Symptom selector dengan severity + multi-select
 - [ ] ❌ Sleep input (bedtime, wake time, quality, disturbances)
 - [ ] ❌ Medication logger (quick toggle + detail)
+- [ ] ❌ Vitals input — Heart Rate (via HC) + Steps (via HC) + Weight (manual) + SpO₂ (manual); import banner; per-metric sync buttons
 - [ ] ❌ Lifestyle factor logger (boolean/numeric/scale)
 - [ ] ❌ Free text input
+- [ ] ❌ Journal entry form: **4-tab layout** — "Mood & Symptoms" | "Sleep & Meds" | "Vitals" | "Lifestyle & Notes"
 - [ ] ❌ Auto-save draft (30 detik interval)
 - [ ] ❌ Journal list dengan lazy loading + search — _`JournalListPage` hanya stub: "Journal" text centered._
 - [ ] ❌ Home page daily summary + streak counter — _`HomePage` hanya stub: "Home" text centered._
 - [ ] ❌ Basic reminder notification system — _Package `flutter_local_notifications` belum di pubspec._
 - [ ] ❌ Adaptive reminder analytics foundation
-- [ ] ❌ Health Connect platform channel (Kotlin + Dart) — _`health_connect_channel.dart` KOSONG. Native Kotlin plugin belum ada. Android manifest permissions belum ditambahkan._
+- [ ] ❌ Health Connect platform channel (Kotlin + Dart) — _`health_connect_channel.dart` sudah ada (bukan kosong) dengan `readHeartRate()`, `readSteps()`, `readSleepSessions()`. Perlu: `authenticateWithBiometrics()` untuk splash, dan native Kotlin plugin + Android manifest permissions._
 - [ ] ❌ Health Connect settings page — _`HealthConnectSettingsPage` hanya stub kosong._
-- [ ] ❌ Widget tests untuk semua input components
+- [ ] ❌ Widget tests untuk semua input components (termasuk `VitalsInput`)
 - [ ] ❌ Integration test: full journal CRUD flow
 - [ ] ❌ Git: branch `feature/journal-crud` + `feature/health-connect` merged ke `develop`
 
-> **Ringkasan Phase 2:** Belum dimulai sama sekali. Phase 1 harus diselesaikan dulu (khususnya Isar database, DI, dan repository implementations) sebelum bisa mulai Phase 2.
+> **Ringkasan Phase 2:** Belum dimulai sama sekali. Phase 1 harus diselesaikan dulu (khususnya Isar database, DI, dan repository implementations) sebelum bisa mulai Phase 2. Perubahan terbaru: tab journal entry diperluas menjadi 4 tabs (ditambah Vitals tab), `VitalRecord` entity baru, dan `SplashPage` sebagai screen pertama app.
 
 ---
 
@@ -3288,13 +3324,26 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 ---
 
-### STEP 6: Selesaikan Onboarding Flow (Screen 2–4) & First Launch
+### STEP 6: Splash Screen + Selesaikan Onboarding Flow (Screen 2–4) & First Launch
 
 **Konteks:** Screen 1 (welcome) sudah selesai dan terlihat profesional. `SymptomSetupPage` ada tapi parsial. Perlu 2-3 screen lagi. Step 5 sudah menyiapkan `symptomSetupNotifier` dan `onboardingCompleteProvider`.
 
 **Dependency dari Step 5:** Provider `selectedSymptomsProvider`, `symptomSetupNotifier`, `onboardingCompleteProvider` sudah aktif dan terhubung ke database.
 
 **Sub-tasks:**
+
+0. **Buat `lib/presentation/pages/splash/splash_page.dart`** — screen pertama setiap kali app dibuka:
+   - Widget: `SplashPage` extends `ConsumerWidget`
+   - Route: tambah `RouteNames.splash = '/splash'` ke `route_names.dart`; set `initialLocation: RouteNames.splash` di `AppRouter`
+   - **Async init chain** (tanpa `Future.delayed` — durasi = waktu nyata async work):
+     1. `KeystoreChannel.getOrCreateKey()` — inisialisasi enkripsi
+     2. `UserPreferencesRepository.isOnboardingComplete()` — jika false → `context.go(RouteNames.symptomSetup)`; stop
+     3. `UserPreferencesRepository.isBiometricEnabled()` — jika true → tampilkan biometric prompt
+     4. Navigasi ke `RouteNames.home` setelah semua berhasil
+   - **Biometric**: via `KeystoreChannel.authenticateWithBiometrics()` (tambahkan method baru ke channel — memanggil Android `BiometricPrompt` via MethodChannel; tidak pakai package `local_auth` yang tidak ada di pubspec)
+   - **Error state**: jika `getOrCreateKey()` gagal → tampilkan error + "Coba Lagi" (retry sequence) + "Hapus Data & Mulai Ulang" (panggil `destroyKey()` lalu navigate ke onboarding)
+   - **Berbeda dari `flutter_native_splash` di Step 17** — ini adalah Flutter app screen yang berjalan di dalam Dart runtime, bukan native launch image dari OS
+   - Visual: zinc950 bg, logo center, `CircularProgressIndicator` saat initializing, fingerprint icon saat `awaitingBiometric`
 
 1. **`lib/presentation/pages/onboarding/symptom_setup_page.dart`** — Lengkapi implementasi:
    - Load daftar default symptoms dari `allSymptomsProvider`
@@ -3361,14 +3410,24 @@ SentryEvent _scrubPii(SentryEvent event) {
    - Tap → detail: waktu minum, dosis
    - State: `journalFormNotifier.updateMedication()`
 
-5. **`lib/presentation/widgets/journal/lifestyle_input.dart`**:
+5. **`lib/presentation/widgets/journal/vitals_input.dart`**:
+   - 4 metric sections: Heart Rate (avg bpm), Steps, Weight (kg), SpO₂ (%)
+   - Import dari Health Connect via `HealthConnectChannel.readHeartRate()` + `readSteps()`
+   - Weight & SpO₂: manual input only — `readWeight()` dan `readSpO2()` belum ada di channel
+   - Tampilkan import banner ("Import all vitals") hanya jika `isAvailable() == true`
+   - Per-metric sync button + manual fallback text fields
+   - HC availability dicek sekali saat `journalEntryPage` init
+   - State: `journalFormNotifier.updateVitals(VitalRecord)`
+   - Semua fields opsional — form valid tanpa vitals
+
+6. **`lib/presentation/widgets/journal/lifestyle_input.dart`**:
    - Render berdasarkan `FactorType` dari entity:
      - `boolean` → toggle switch ("Consumed caffeine? Yes/No")
      - `numeric` → number input + unit label ("Water: \_\_\_ glasses")
      - `scale` → slider 1-10 ("Stress level")
    - State: `journalFormNotifier.updateLifestyleFactor()`
 
-6. **`lib/presentation/widgets/journal/free_text_input.dart`**:
+7. **`lib/presentation/widgets/journal/free_text_input.dart`**:
    - Multi-line text field
    - Placeholder: "How are you feeling today? Any triggers you noticed?"
    - Word count di bawah
@@ -3376,7 +3435,7 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 **Verifikasi:** Buat widget test untuk setiap input widget: interact → verify form state berubah. Visual review di emulator.
 
-**Output step ini → input step berikutnya:** Semua input widgets siap. Step 8 merakit mereka menjadi halaman JournalEntryPage penuh dengan save flow.
+**Output step ini → input step berikutnya:** Semua 7 input widgets siap. Step 8 merakit mereka menjadi halaman JournalEntryPage penuh dengan tab layout 4 tabs + save flow.
 
 ---
 
@@ -3389,10 +3448,12 @@ SentryEvent _scrubPii(SentryEvent event) {
 **Sub-tasks:**
 
 1. **`lib/presentation/pages/journal/journal_entry_page.dart`** — Full implementation:
-   - **Tab/section layout:**
+   - **Tab/section layout (4 tabs):**
      - Tab 1: Mood + Symptoms (default, paling penting)
      - Tab 2: Sleep + Medications
-     - Tab 3: Lifestyle + Notes
+     - Tab 3: Vitals (Health Connect import + manual fallback)
+     - Tab 4: Lifestyle + Notes
+   - `TabController(length: 4, vsync: this)` — require `TickerProviderStateMixin`
    - **Date picker** di AppBar — default hari ini, bisa ganti
    - **Edit mode:** Jika `entryId != null`, load existing entry dari `journalEntryProvider(id)`, pre-fill form
    - **Submit button:** Validasi → buat `JournalEntry` entity → panggil `CreateJournalEntry` / `UpdateJournalEntry` use case via notifier → navigate back ke list + show success snackbar
