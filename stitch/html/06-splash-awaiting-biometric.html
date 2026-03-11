@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;700&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#09090b",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "20px": "20px",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display antialiased text-slate-100 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+<!-- Top Safe Area Spacer -->
+<div class="h-6 w-full"></div>
+<!-- Main Content Container -->
+<div class="flex-1 flex flex-col items-center justify-center w-full max-w-md px-6 text-center">
+<!-- Brand Block Container -->
+<div class="w-20 h-20 rounded-20px bg-teal-500/15 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-teal-500 !text-[40px]" data-icon="favorite">
+                favorite
+            </span>
+</div>
+<!-- App Name -->
+<h1 class="text-[32px] font-bold tracking-tight text-slate-50 mb-2">
+            MedMind
+        </h1>
+<!-- Subtitle -->
+<p class="text-sm font-normal text-zinc-400 mb-24">
+            Your private health journal
+        </p>
+<!-- Biometric Interaction Area -->
+<div class="flex flex-col items-center space-y-4">
+<!-- Fingerprint Icon -->
+<div class="flex items-center justify-center">
+<span class="material-symbols-outlined text-zinc-400 !text-[32px]" data-icon="fingerprint">
+                    fingerprint
+                </span>
+</div>
+<!-- Instruction Text -->
+<p class="text-sm font-normal text-zinc-400 max-w-[240px] leading-relaxed">
+                Use your fingerprint or face to unlock the app
+            </p>
+</div>
+</div>
+<!-- Bottom Padding/Safe Area -->
+<div class="pb-12 w-full"></div>
+<!-- Background Pattern/Image Element (Implicitly following requirements) -->
+<div class="fixed inset-0 -z-10 opacity-10 pointer-events-none overflow-hidden">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full" data-alt="Soft orange glowing circular light gradient background"></div>
+</div>
+</body></html>

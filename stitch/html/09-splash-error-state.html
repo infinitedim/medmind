@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#14b8a6", // Teal 500
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#09090b", // Zinc 950
+                        "zinc": {
+                            300: "#d4d4d8",
+                            500: "#71717a",
+                            950: "#09090b",
+                        },
+                        "red": {
+                            500: "#ef4444",
+                        }
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"],
+                        "inter": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>MedMind Splash Screen - Error</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-zinc-950 font-inter antialiased">
+<div class="relative flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-zinc-950 px-6">
+<!-- Safe Area Spacer -->
+<div class="absolute top-0 h-6 w-full"></div>
+<!-- Main Content Container -->
+<div class="flex flex-col items-center justify-center w-full max-w-sm">
+<!-- Error Icon -->
+<div class="mb-6 flex items-center justify-center">
+<span class="material-symbols-outlined text-[48px] text-red-500">
+                    lock_outline
+                </span>
+</div>
+<!-- Error Title -->
+<h2 class="text-[14px] font-medium leading-tight text-zinc-300 text-center mb-2">
+                Failed to initialize encryption
+            </h2>
+<!-- Error Subtext -->
+<p class="text-[13px] font-normal leading-normal text-zinc-500 text-center mb-10">
+                An unexpected error occurred while securing your data.
+            </p>
+<!-- Action Buttons -->
+<div class="flex w-full flex-col gap-3">
+<button class="flex h-12 w-full cursor-pointer items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold leading-normal tracking-wide text-zinc-950">
+<span class="truncate">Try Again</span>
+</button>
+<button class="flex h-10 w-full cursor-pointer items-center justify-center bg-transparent px-4 text-sm font-medium leading-normal tracking-wide text-red-500">
+<span class="truncate">Clear Data &amp; Reset</span>
+</button>
+</div>
+</div>
+<!-- Decorative background elements (subtle) -->
+<div class="absolute inset-0 -z-10 pointer-events-none opacity-10">
+<div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary rounded-full blur-[120px]"></div>
+</div>
+</div>
+</body></html>
