@@ -6,6 +6,13 @@
 			"gallery": "https://api.mcp.github.com",
 			"version": "1.0.0"
 		},
+		"stitch": {
+			"type": "http",
+			"url": "https://stitch.googleapis.com/mcp",
+			"headers": {
+				"X-Goog-Api-Key": "${input:token}"
+			}
+		},
 		"io.github.github/github-mcp-server": {
 			"type": "stdio",
 			"command": "docker",
