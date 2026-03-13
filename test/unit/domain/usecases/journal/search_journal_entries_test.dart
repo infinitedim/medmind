@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:medmind/core/errors/failures.dart';
+import 'package:medmind/domain/entities/journal_entry.dart';
 import 'package:medmind/domain/usecases/journal/search_journal_entries.dart';
 
 import '../../../../helpers/mock_repositories.dart';
@@ -42,7 +43,7 @@ void main() {
 
       final result = await usecase('nonexistent query');
 
-      expect(result, const Right(<dynamic>[]));
+      expect(result, const Right(<JournalEntry>[]));
     });
 
     test('mengembalikan DatabaseFailure ketika pencarian gagal', () async {

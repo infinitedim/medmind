@@ -11,12 +11,17 @@ import 'package:medmind/presentation/pages/settings/health_connect_settings_page
 import 'package:medmind/presentation/pages/settings/reminder_settings_page.dart';
 import 'package:medmind/presentation/pages/settings/secutiry_settings_page.dart';
 import 'package:medmind/presentation/pages/settings/settings_page.dart';
+import 'package:medmind/presentation/pages/splash/splash_page.dart';
 import 'package:medmind/presentation/shared/app_bottom_nav.dart';
 
 final appRouter = GoRouter(
-  initialLocation: RouteNames.home,
+  initialLocation: RouteNames.splash,
   debugLogDiagnostics: true,
   routes: [
+    GoRoute(
+      path: RouteNames.splash,
+      builder: (context, state) => const SplashPage(),
+    ),
     GoRoute(
       path: RouteNames.onboarding,
       builder: (context, state) => const OnboardingPage(),

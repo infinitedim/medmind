@@ -17,3 +17,5 @@ enum FactorType { boolean, numeric, scale }
 enum InsightType { correlation, anomaly, trend, recommendation }
 
 enum ScoreTrend { improving, stable, declining }
+
+enum VitalSource { manual, healthConnect }

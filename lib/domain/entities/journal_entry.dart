@@ -4,6 +4,7 @@ import 'package:medmind/domain/entities/lifestyle_factor.dart';
 import 'package:medmind/domain/entities/medication.dart';
 import 'package:medmind/domain/entities/sleep_record.dart';
 import 'package:medmind/domain/entities/symptom.dart';
+import 'package:medmind/domain/entities/vital_record.dart';
 
 part 'journal_entry.freezed.dart';
 
@@ -21,6 +22,7 @@ abstract class JournalEntry with _$JournalEntry {
     String? freeText,
     List<ExtractedSymptom>? extractedSymptoms,
     ActivityLevel? activityLevel,
+    VitalRecord? vitalRecord,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _JournalEntry;

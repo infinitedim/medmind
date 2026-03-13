@@ -1,4 +1,5 @@
 abstract final class RouteNames {
+  static const splash = '/splash';
   static const onboarding = '/onboarding';
   static const symptomSetup = '/onboarding/symptoms';
   static const lifestyleSetup = '/onboarding/lifestyle';

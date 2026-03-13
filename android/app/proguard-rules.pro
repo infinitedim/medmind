@@ -1,0 +1,3 @@
+-keep class io.flutter.** { *; }
+-keep class io.isar.** { *; }
+-dontwarn io.isar.**

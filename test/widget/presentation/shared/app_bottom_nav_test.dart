@@ -37,7 +37,8 @@ void main() {
     testWidgets('menampilkan NavigationBar', (tester) async {
       await tester.pumpWidget(buildWithRouter(child: const SizedBox()));
       await tester.pumpAndSettle();
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(AppShell), findsOneWidget);
+      expect(find.byType(Scaffold), findsOneWidget);
     });
 
     // TODO: tambahkan test saat navigasi sudah stabil
