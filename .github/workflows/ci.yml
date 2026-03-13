@@ -31,22 +31,14 @@ jobs:
 
       - name: Check coverage
         run: |
-          # Install lcov
           sudo apt-get install -y lcov
-          # Remove generated files from coverage
-          lcov --remove coverage/lcov.info \
-            '**/*.g.dart' \
-            '**/*.freezed.dart' \
-            '**/*.gen.dart' \
-            'lib/generated/*' \
-            -o coverage/lcov.info
-          # Generate coverage report
+          grep -vE '^SF:.*\.(g|freezed|gen)\.dart$' coverage/lcov.info \
+            | grep -vE '^SF:.*/generated/' \
+            > coverage/lcov_filtered.info
+          mv coverage/lcov_filtered.info coverage/lcov.info
           genhtml coverage/lcov.info -o coverage/html
-          # Check minimum coverage (Phase 1: 60%, akan dinaikkan bertahap)
           COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep "lines" | awk '{print $2}' | tr -d '%')
           echo "Coverage: $COVERAGE%"
-          # Uncomment saat sudah siap enforce:
-          # if (( $(echo "$COVERAGE < 60" | bc -l) )); then exit 1; fi
 
   integration-test:
     name: Integration & E2E Tests
