@@ -24,12 +24,12 @@ subprojects {
     plugins.withId("com.android.library") {
         try {
             extensions.configure<com.android.build.gradle.LibraryExtension> {
+                compileSdk = 34
                 if (namespace == null) {
                     namespace = group.toString()
                 }
             }
         } catch (_: Throwable) {
-            // Older AGP versions (e.g. isar_flutter_libs uses 4.1.0) may not support namespace
         }
     }
 }
