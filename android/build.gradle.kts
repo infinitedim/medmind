@@ -6,34 +6,32 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory =
-    rootProject.layout.buildDirectory
-        .dir("../../build")
-        .get()
+val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
+
 rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
-subprojects {
-    project.evaluationDependsOn(":app")
-}
+
+subprojects { project.evaluationDependsOn(":app") }
 
 subprojects {
-    plugins.withId("com.android.library") {
-        try {
+    afterEvaluate {
+        // Force compileSdk >= 31 on ALL library subprojects so that resources
+        // referencing android:attr/lStar (introduced in API 31 / Android 12)
+        // compile successfully.  This is required for isar_flutter_libs which
+        // ships with AGP 4.1.0 and ignores plugins.withId() hooks.
+        if (plugins.hasPlugin("com.android.library")) {
             extensions.configure<com.android.build.gradle.LibraryExtension> {
                 compileSdk = 34
                 if (namespace == null) {
                     namespace = group.toString()
                 }
             }
-        } catch (_: Throwable) {
         }
     }
 }
 
-tasks.register<Delete>("clean") {
-    delete(rootProject.layout.buildDirectory)
-}
+tasks.register<Delete>("clean") { delete(rootProject.layout.buildDirectory) }
