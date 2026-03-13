@@ -18,17 +18,15 @@ subprojects {
 subprojects { project.evaluationDependsOn(":app") }
 
 subprojects {
-    afterEvaluate {
-        // Force compileSdk >= 31 on ALL library subprojects so that resources
-        // referencing android:attr/lStar (introduced in API 31 / Android 12)
-        // compile successfully.  This is required for isar_flutter_libs which
-        // ships with AGP 4.1.0 and ignores plugins.withId() hooks.
-        if (plugins.hasPlugin("com.android.library")) {
-            extensions.configure<com.android.build.gradle.LibraryExtension> {
-                compileSdk = 34
-                if (namespace == null) {
-                    namespace = group.toString()
-                }
+    // plugins.withId fires at plugin-application time (before project evaluation
+    // completes), so it is safe with Gradle 8+ and AGP 8+.
+    // This forces compileSdk >= 31 on all library subprojects so that resources
+    // referencing android:attr/lStar (introduced in API 31) compile correctly.
+    plugins.withId("com.android.library") {
+        extensions.configure<com.android.build.gradle.LibraryExtension> {
+            compileSdk = 34
+            if (namespace == null) {
+                namespace = group.toString()
             }
         }
     }

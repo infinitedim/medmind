@@ -76,7 +76,11 @@ jobs:
           api-level: 33
           arch: x86_64
           profile: Nexus 6
-          script: flutter test integration_test --verbose
+          # Run a single combined entry-point so Flutter builds one APK and
+          # installs it once, avoiding the DELETE_FAILED_INTERNAL_ERROR that
+          # occurs when the runner tries to uninstall a non-existent package
+          # before the very first test file.
+          script: flutter test integration_test/all_tests.dart --timeout 120s
 
   build-android:
     runs-on: ubuntu-latest
