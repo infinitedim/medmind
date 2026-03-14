@@ -1,7 +1,7 @@
 # MedMind — UI/UX & Wireframe Generation Prompts
 
-> **Terakhir diperbarui:** 10 Maret 2026
-> (v6 — Tambah SCREEN 0: Splash Screen; v5 — Swap label 5D↔5E;
+> **Terakhir diperbarui:** 14 Maret 2026
+> (v7 — Update Flutter 3.41 compatibility; v6 — Tambah SCREEN 0: Splash Screen; v5 — Swap label 5D↔5E;
 > tambah COMPONENT: CorrelationHeatmap standalone; InsightCard interaction states)
 >
 > Prompt-prompt di bawah ini digunakan untuk generate wireframe dan UI/UX design
@@ -702,7 +702,7 @@ Layout: Center → Column (mainAxisSize: MainAxisSize.min, crossAxisAlignment: c
   ┌────────────────────────────────────────────────────────┐
   │                                                        │
   │   Container 80×80, BorderRadius.circular(20)          │
-  │     color: AppColors.primary500.withOpacity(0.15)      │
+  │     color: AppColors.primary500.withValues(alpha: 0.15)   │
   │     child: Icon(Icons.favorite_outline,                │
   │                 color: AppColors.primary500, size: 40) │
   │                                                        │
@@ -743,9 +743,10 @@ STATE MACHINE
 enum SplashState { initializing, awaitingBiometric, error }
 
 Representasi state lokal:
-  // Opsi A (sederhana): gunakan dua StateProvider lokal di dalam ConsumerWidget
-  final _stateProvider = StateProvider<SplashState>((_) => SplashState.initializing);
-  final _errorProvider  = StateProvider<String?>((_) => null);
+  // Opsi A (sederhana): gunakan field lokal di ConsumerStatefulWidget + setState
+  //   SplashState _state = SplashState.initializing;
+  //   String? _errorMessage;
+  // (StateProvider DIHAPUS di Riverpod 3.x — gunakan local field atau Opsi B)
 
   // Opsi B (lebih terstruktur): buat SplashNotifier extends Notifier<SplashViewModel>
   // dengan SplashViewModel({ SplashState state, String? errorMessage })
@@ -1021,7 +1022,7 @@ Flutter specifics:
 - Widget: ConsumerStatefulWidget (needs Riverpod for selected symptoms state)
 - SearchController for TextField
 - Category filter: ValueNotifier<SymptomCategory?> (null = "All")
-- Selected set: StateNotifier<Set<String>> of symptom IDs
+- Selected set: Notifier<Set<String>> of symptom IDs (StateNotifier DIHAPUS di Riverpod 3.x)
 ```
 
 ---
@@ -1606,7 +1607,7 @@ INTERACTION STATES:
 
 Flutter specifics:
 - ConsumerStatefulWidget with TabController
-- journalFormNotifier StateNotifier for all form state
+- journalFormNotifier Notifier (bukan StateNotifier — dihapus di Riverpod 3.x) for all form state
 - flutter_animate for mood selection, intensity slide-down, symptom expand
 - PopScope for unsaved changes guard
 - Timer.periodic(30s) for auto-draft save
@@ -2835,7 +2836,7 @@ INTERACTION STATES:
 
 Flutter specifics:
 - ConsumerStatefulWidget with export state machine (idle → exporting → done/error)
-- exportNotifier: StateNotifier managing progress (entryIndex / totalEntries)
+- exportNotifier: Notifier (bukan StateNotifier — dihapus di Riverpod 3.x) managing progress (entryIndex / totalEntries)
 - journalCountProvider for data stats in preview card
 - showDateRangePicker for custom date range selection
 - Share.shareXFiles (share_plus) for sharing exported file

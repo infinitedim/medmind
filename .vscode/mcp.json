@@ -1,4 +1,36 @@
 {
+	"inputs": [
+		{
+			"id": "token",
+			"type": "promptString",
+			"description": "",
+			"password": true
+		},
+		{
+			"id": "CONTEXT7_API_KEY",
+			"type": "promptString",
+			"description": "API key for authentication",
+			"password": true
+		},
+		{
+			"id": "X-Goog-Api-Key",
+			"type": "promptString",
+			"description": "API key for Google services",
+			"password": true
+		},
+		{
+			"id": "TAVILY_API_KEY",
+			"type": "promptString",
+			"description": "Your Tavily API key from tavily.com",
+			"password": true
+		},
+		{
+			"id": "DEFAULT_PARAMETERS",
+			"type": "promptString",
+			"description": "JSON string with default search parameters (e.g., {\"include_images\": true, \"max_results\": 15})",
+			"password": false
+		}
+	],
 	"servers": {
 		"huggingface/hf-mcp-server": {
 			"type": "http",
@@ -6,13 +38,6 @@
 			"gallery": "https://api.mcp.github.com",
 			"version": "1.0.0"
 		},
-		// "stitch": {
-		// 	"type": "http",
-		// 	"url": "https://stitch.googleapis.com/mcp",
-		// 	"headers": {
-		// 		"X-Goog-Api-Key": "${input:token}"
-		// 	}
-		// },
 		"io.github.github/github-mcp-server": {
 			"type": "stdio",
 			"command": "docker",
@@ -52,43 +77,11 @@
 			"gallery": "https://api.mcp.github.com",
 			"version": "0.2.15"
 		},
-		// "com.figma.mcp/mcp": {
-		// 	"type": "http",
-		// 	"url": "https://mcp.figma.com/mcp",
-		// 	"gallery": "https://api.mcp.github.com",
-		// 	"version": "1.0.3"
-		// }
-	},
-	"inputs": [
-		{
-			"id": "token",
-			"type": "promptString",
-			"description": "",
-			"password": true
-		},
-		{
-			"id": "CONTEXT7_API_KEY",
-			"type": "promptString",
-			"description": "API key for authentication",
-			"password": true
-		},
-		{
-			"id": "X-Goog-Api-Key",
-			"type": "promptString",
-			"description": "API key for Google services",
-			"password": true
-		},
-		{
-			"id": "TAVILY_API_KEY",
-			"type": "promptString",
-			"description": "Your Tavily API key from tavily.com",
-			"password": true
-		},
-		{
-			"id": "DEFAULT_PARAMETERS",
-			"type": "promptString",
-			"description": "JSON string with default search parameters (e.g., {\"include_images\": true, \"max_results\": 15})",
-			"password": false
+		"com.figma.mcp/mcp": {
+			"type": "http",
+			"url": "https://mcp.figma.com/mcp",
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.3"
 		}
-	]
+	}
 }

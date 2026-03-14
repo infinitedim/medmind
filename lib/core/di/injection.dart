@@ -24,11 +24,11 @@ Future<void> configureDependencies() async => getIt.init();
 /// Module yang mendaftarkan dependensi eksternal / platform ke GetIt.
 @module
 abstract class AppModule {
-  /// FlutterSecureStorage dengan AndroidOptions untuk EncryptedSharedPreferences.
+  /// FlutterSecureStorage — enkripsi custom cipher (default 10.x).
+  /// encryptedSharedPreferences dihapus di 10.x karena Jetpack Security
+  /// deprecated oleh Google; data lama dimigrasikan otomatis saat first access.
   @lazySingleton
-  FlutterSecureStorage get secureStorage => const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
 
   /// Membuka dan mengembalikan instance [Isar] yang sudah di-encrypt.
   ///

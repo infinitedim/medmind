@@ -3,7 +3,8 @@
 > Dokumen ini adalah panduan langkah-demi-langkah untuk membangun MedMind dari nol sampai siap rilis di Play Store.
 > Ditulis untuk developer yang akan mengerjakan sendiri (solo dev).
 >
-> **Terakhir diperbarui:** 10 Maret 2026
+> **Terakhir diperbarui:** 14 Maret 2026
+> **Flutter SDK target:** 3.41.4 stable (Dart 3.7.x) — semua package versions, API, dan CI config di dokumen ini mengacu pada versi ini.
 > **Status Keseluruhan:** ~40% complete — Domain layer 100%, Data layer ~65% (foundation selesai, 6 repository implementations kosong), Presentation layer ~5% (routing/theming/shell selesai, semua page stub), Insight Engine 0%, ML Integration 0%, Testing ~15% (14 test files ada, unit tests jalan, widget tests basic).
 >
 > **Breakdown per layer:**
@@ -321,45 +322,45 @@ main ← production-ready code
      flutter:
        sdk: flutter
      # State management
-     flutter_riverpod: ^2.5.x
-     riverpod_annotation: ^2.3.x
+     flutter_riverpod: ^3.3.x # Riverpod 3.x — StateNotifier/StateProvider DIHAPUS, pakai Notifier
+     riverpod_annotation: ^4.0.x # Harus sinkron dengan riverpod_generator versi major yang sama
 
      # Database
      isar: ^3.1.x
      isar_flutter_libs: ^3.1.x
 
      # Models
-     freezed_annotation: ^2.4.x
-     json_annotation: ^4.9.x
+     freezed_annotation: ^3.1.x # Freezed 3.x — breaking changes dari v2.x
+     json_annotation: ^4.11.x
 
      # DI
-     get_it: ^7.7.x
-     injectable: ^2.4.x
+     get_it: ^9.2.x
+     injectable: ^2.7.x
 
      # Navigation
-     go_router: ^14.x.x
+     go_router: ^17.x.x # API largely sama, beberapa builder signatures berubah
 
      # Security
-     flutter_secure_storage: ^9.2.x
+     flutter_secure_storage: ^10.0.x # 10.x — split ke platform packages (darwin, linux, web, windows); API FlutterSecureStorage() sama
      encrypt: ^5.0.x
 
      # Utils
      path_provider: ^2.1.x
-     intl: ^0.19.x
-     logger: ^2.4.x
+     intl: ^0.20.x
+     logger: ^2.6.x
 
    dev_dependencies:
      flutter_test:
        sdk: flutter
-     very_good_analysis: ^6.0.x
-     build_runner: ^2.4.x
-     freezed: ^2.5.x
-     json_serializable: ^6.8.x
-     riverpod_generator: ^2.4.x
-     isar_generator: ^3.1.x
-     injectable_generator: ^2.6.x
-     mockito: ^5.4.x
-     build_verify: ^3.1.x
+     very_good_analysis: ^10.2.x
+     build_runner: ^2.12.x
+     freezed: ^3.1.x
+     json_serializable: ^6.13.x
+     riverpod_generator: ^4.0.x # Harus sinkron dengan riverpod_annotation versi major yang sama
+     # HAPUS isar_generator — konflik dengan build_runner modern.
+     # Gunakan tools/generate_isar_schemas.sh (isolated project) untuk generate .g.dart
+     injectable_generator: ^2.7.x
+     mocktail: ^1.0.x # Bukan mockito — mocktail tidak butuh codegen
    ```
 
 3. **Setup analysis_options.yaml**
@@ -869,6 +870,11 @@ final journalRepositoryProvider = Provider<JournalRepository>((ref) {
   return getIt<JournalRepository>();
 });
 
+// Catatan Riverpod 3.x: FutureProvider.family masih valid tapi pendekatan
+// codegen (@riverpod annotation) lebih direkomendasikan untuk konsistensi.
+// Alternatif codegen:
+//   @riverpod
+//   Future<List<JournalEntry>> journalEntries(Ref ref, DateRange? dateRange) async { ... }
 final journalEntriesProvider = FutureProvider.family<List<JournalEntry>, DateRange?>((ref, dateRange) async {
   final repo = ref.watch(journalRepositoryProvider);
   final result = await repo.getEntries(
@@ -1033,9 +1039,9 @@ name: CI
 
 on:
   push:
-    branches: [development main]
+    branches: [development, main]
   pull_request:
-    branches: [development main]
+    branches: [development, main]
 
 jobs:
   analyze-and-test:
@@ -1045,7 +1051,8 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.27.x" # Pin versi Flutter
+          # Jangan pin flutter-version — pakai channel: stable saja.
+          # Pin versi menyebabkan CI pakai versi lama ketika stable channel sudah naik.
           channel: "stable"
           cache: true
 
@@ -1058,16 +1065,17 @@ jobs:
       - name: Analyze
         run: flutter analyze --fatal-infos
 
-      - name: Run tests
-        run: flutter test --coverage
+      - name: Run unit & widget tests
+        run: flutter test test/ --coverage
 
       - name: Check coverage
         run: |
-          # Install lcov
           sudo apt-get install -y lcov
-          # Generate coverage report
+          grep -vE '^SF:.*\.(g|freezed|gen)\.dart$' coverage/lcov.info \
+            | grep -vE '^SF:.*/generated/' \
+            > coverage/lcov_filtered.info
+          mv coverage/lcov_filtered.info coverage/lcov.info
           genhtml coverage/lcov.info -o coverage/html
-          # Check minimum coverage (Phase 1: 60%, akan dinaikkan bertahap)
           COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep "lines" | awk '{print $2}' | tr -d '%')
           echo "Coverage: $COVERAGE%"
           # Uncomment saat sudah siap enforce:
@@ -1076,13 +1084,12 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     needs: analyze-and-test
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.27.x"
           channel: "stable"
           cache: true
 
@@ -1091,8 +1098,22 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
+      - name: Install dependencies
+        run: flutter pub get
+
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Decode keystore
+        if: env.KEYSTORE_BASE64 != ''
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/medmind-upload-key.jks
+          cat <<EOF > android/key.properties
+          storePassword=$KEYSTORE_STORE_PASSWORD
+          keyPassword=$KEYSTORE_KEY_PASSWORD
+          keyAlias=$KEYSTORE_KEY_ALIAS
+          storeFile=medmind-upload-key.jks
+          EOF
 
       - name: Build APK
         run: flutter build apk --release
@@ -1128,7 +1149,7 @@ jobs:
    **Catatan:** Belum ditambahkan ke pubspec di Phase 1 dependencies di atas. Tambahkan:
 
    ```yaml
-   local_auth: ^2.3.x
+   local_auth: ^3.0.x
    shared_preferences: ^2.3.x
    ```
 
@@ -1217,7 +1238,7 @@ jobs:
    - 5 mood levels dengan emoji/ikon: 😊 🙂 😐 😟 😰
    - Tap untuk pilih → slider muncul untuk intensity (1-10)
    - Animasi transisi antar mood (pakai `flutter_animate`)
-   - State dikelola oleh Riverpod `StateProvider` lokal di form
+   - State dikelola oleh Riverpod — gunakan `@riverpod` codegen dengan `Notifier` class (`StateProvider` dihapus di Riverpod 3.x)
 
 2. **Symptom Selector widget**
    - Grid/chip display dari gejala yang dipilih user saat onboarding
@@ -1228,7 +1249,7 @@ jobs:
 
    **UX Consideration:** User yang sedang sakit tidak mau mengisi form yang ribet. Buat semua input bisa diselesaikan dengan 2-3 tap. Severity default = 5, auto-suggest based on history.
 
-3. **Buat `JournalFormState`** — Riverpod `StateNotifier` yang mengelola semua field form secara terpusat:
+3. **Buat `JournalFormState`** — Riverpod `Notifier` yang mengelola semua field form secara terpusat (`StateNotifier` dihapus di Riverpod 3.x — gunakan `Notifier` dengan `@riverpod` annotation):
 
    ```dart
    @riverpod
@@ -2278,16 +2299,24 @@ tflite_flutter: ^0.10.x
    }
    ```
 
-   **Catatan penting:**
-   - `tflite_flutter` mungkin tidak bisa dipakai langsung di isolate karena menggunakan FFI yang tied ke main isolate. Kalau ini terjadi, alternative approach:
-     - Gunakan `compute()` function saja (single isolate per inference) — lebih sederhana
-     - Atau gunakan approach `RootIsolateToken` yang tersedia di Flutter 3.7+
+   **Catatan penting (Flutter 3.41 / Dart 3.7):**
+   - `tflite_flutter` mungkin tidak bisa dipakai langsung di isolate karena menggunakan FFI yang tied ke main isolate. Kalau ini terjadi, gunakan salah satu pendekatan berikut:
+     - **`Isolate.run()` (Rekomendasi — Dart 2.19+/Flutter 3.7+):** API jauh lebih sederhana dari `Isolate.spawn()`. Cocok untuk single inference call:
+       ```dart
+       final result = await Isolate.run(() => runTFLiteInference(input));
+       ```
+     - **`compute()` function:** wrapper Flutter di atas `Isolate.run()`, sudah ada sejak Flutter 1.x — cukup untuk single inference
+     - **`RootIsolateToken` + `BackgroundIsolateBinaryMessenger.ensureInitialized(token)`:** diperlukan kalau isolate butuh akses ke platform channels (misal untuk load asset via `rootBundle`)
    - **Test di device asli**, bukan emulator — performance berbeda signifikan
 
 3. **Model lifecycle management:**
 
    ```dart
    // lib/data/datasources/ml/ml_model_manager.dart
+   // Flutter 3.13+ memperkenalkan AppLifecycleListener sebagai pengganti
+   // WidgetsBindingObserver untuk kasus lifecycle sederhana. Keduanya valid,
+   // tapi AppLifecycleListener lebih clean dan tidak perlu dispose manual.
+   // Pilihan: gunakan AppLifecycleListener jika hanya butuh lifecycle callbacks.
    class MLModelManager with WidgetsBindingObserver {
      final Map<String, IsolatePoolManager> _pools = {};
 
@@ -3296,9 +3325,9 @@ SentryEvent _scrubPii(SentryEvent event) {
 
 1. **Buat `lib/presentation/providers/journal_providers.dart`**:
    - `journalRepositoryProvider` — Riverpod `Provider` yang resolve dari `getIt<JournalRepository>()`
-   - `journalEntriesProvider` — `FutureProvider.family<List<JournalEntry>, DateRange?>` yang panggil `getEntries()`
+   - `journalEntriesProvider` — `FutureProvider.family<List<JournalEntry>, DateRange?>` yang panggil `getEntries()` (`FutureProvider.family` masih valid di Riverpod 3.x; alternatif codegen: `@riverpod Future<List<JournalEntry>> journalEntries(Ref ref, DateRange? dateRange)`)
    - `journalEntryProvider(String id)` — load single entry by ID
-   - `journalFormNotifier` — `StateNotifier` atau `Notifier` yang manage form state (mood, symptoms, sleep, medications, lifestyle, freeText) dan method `submit()` yang panggil `CreateJournalEntry` use case
+   - `journalFormNotifier` — `Notifier` (bukan `StateNotifier` — dihapus di Riverpod 3.x) yang manage form state (mood, symptoms, sleep, medications, lifestyle, freeText) dan method `submit()` yang panggil `CreateJournalEntry` use case
    - `journalSearchProvider(String query)` — untuk search
 
 2. **Buat `lib/presentation/providers/symptom_providers.dart`**:
@@ -3458,7 +3487,7 @@ SentryEvent _scrubPii(SentryEvent event) {
    - **Edit mode:** Jika `entryId != null`, load existing entry dari `journalEntryProvider(id)`, pre-fill form
    - **Submit button:** Validasi → buat `JournalEntry` entity → panggil `CreateJournalEntry` / `UpdateJournalEntry` use case via notifier → navigate back ke list + show success snackbar
    - **Auto-save draft:** Timer 30 detik → simpan draft ke Isar (tambahkan field `isDraft` ke model)
-   - **Unsaved changes guard:** `WillPopScope` / `PopScope` → dialog "Simpan sebagai draft?" jika ada perubahan
+   - **Unsaved changes guard:** `PopScope` → dialog "Simpan sebagai draft?" jika ada perubahan (`WillPopScope` dihapus sejak Flutter 3.24 — gunakan `PopScope(canPop: false, onPopInvokedWithResult: (didPop, result) { ... })`)
 
 2. **`lib/presentation/pages/journal/journal_list_page.dart`** — Full implementation:
    - List dari `journalEntriesProvider`
