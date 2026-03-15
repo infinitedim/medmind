@@ -67,5 +67,8 @@ flutter_native_splash:
   ios: false
   android_gravity: center
   fullscreen: true
+
+flutter:
+  uses-material-design: true
   assets:
     - assets/icon/
