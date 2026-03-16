@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:isar/isar.dart';
 import 'package:medmind/data/datasources/local/isar_database.dart';
 import 'package:medmind/platform/keystore_channel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'injection.config.dart';
 
@@ -18,8 +19,6 @@ final getIt = GetIt.instance;
 /// ```
 @InjectableInit()
 Future<void> configureDependencies() async => getIt.init();
-
-// ─── App Module ─────────────────────────────────────────────────────────────
 
 /// Module yang mendaftarkan dependensi eksternal / platform ke GetIt.
 @module
@@ -41,4 +40,8 @@ abstract class AppModule {
   @preResolve
   @lazySingleton
   Future<Isar> isar(KeystoreChannel keystore) => IsarDatabase.open(keystore);
+
+  @preResolve
+  @lazySingleton
+  Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
 }

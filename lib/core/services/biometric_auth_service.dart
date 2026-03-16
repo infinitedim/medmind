@@ -28,8 +28,6 @@ class BiometricAuthService {
     try {
       return await _auth.authenticate(
         localizedReason: 'Masuk ke MedMind',
-        // local_auth 3.x: options/AuthenticationOptions tidak lagi di-expose.
-        // stickyAuth → persistAcrossBackgrounding
         biometricOnly: false,
         persistAcrossBackgrounding: true,
       );
