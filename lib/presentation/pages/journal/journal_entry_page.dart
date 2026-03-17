@@ -186,7 +186,7 @@ class _JournalEntryPageState extends ConsumerState<JournalEntryPage>
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final canPop = await _confirmDiscard(formAsync.asData?.value);
-        if (canPop && mounted) context.pop();
+        if (canPop && context.mounted) context.pop();
       },
       child: Scaffold(
         backgroundColor: AppColors.zinc950,
@@ -197,7 +197,7 @@ class _JournalEntryPageState extends ConsumerState<JournalEntryPage>
             icon: const Icon(LucideIcons.x, color: AppColors.zinc400),
             onPressed: () async {
               final canPop = await _confirmDiscard(formAsync.asData?.value);
-              if (canPop && mounted) context.pop();
+              if (canPop && context.mounted) context.pop();
             },
           ),
           title: formAsync.when(
