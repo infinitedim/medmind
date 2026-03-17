@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:medmind/core/errors/failures.dart';
 import 'package:medmind/domain/repositories/user_preferences_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @LazySingleton(as: UserPreferencesRepository)
 class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
@@ -14,7 +14,7 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
   static const _onboardingKey = 'onboarding_complete';
   static const _reminderKey = 'reminder_time';
   static const _themeKey = 'theme_mode';
-  static const _trackedSymptomsKey = 'tracked_symptom_ids';
+  static const _trackedKey = 'tracked_symptom_ids';
 
   @override
   Future<Either<Failure, bool>> isBiometricEnabled() async =>
@@ -24,12 +24,8 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
   Future<Either<Failure, void>> setBiometricEnabled({
     required bool enabled,
   }) async {
-    try {
-      await _prefs.setBool(_biometricKey, enabled);
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Gagal menyimpan biometric setting: $e'));
-    }
+    await _prefs.setBool(_biometricKey, enabled);
+    return const Right(null);
   }
 
   @override
@@ -38,12 +34,8 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
   @override
   Future<Either<Failure, void>> completeOnboarding() async {
-    try {
-      await _prefs.setBool(_onboardingKey, true);
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Gagal menyimpan onboarding status: $e'));
-    }
+    await _prefs.setBool(_onboardingKey, true);
+    return const Right(null);
   }
 
   @override
@@ -52,39 +44,41 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
   @override
   Future<Either<Failure, void>> setReminderTime(String time) async {
-    try {
-      await _prefs.setString(_reminderKey, time);
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Gagal menyimpan reminder time: $e'));
-    }
+    await _prefs.setString(_reminderKey, time);
+    return const Right(null);
   }
 
   @override
   Future<Either<Failure, String>> getThemeMode() async =>
-      Right(_prefs.getString(_themeKey) ?? 'system');
+      Right(_prefs.getString(_themeKey) ?? 'dark');
 
   @override
   Future<Either<Failure, void>> setThemeMode(String mode) async {
-    try {
-      await _prefs.setString(_themeKey, mode);
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Gagal menyimpan theme mode: $e'));
-    }
+    await _prefs.setString(_themeKey, mode);
+    return const Right(null);
   }
 
   @override
   Future<Either<Failure, List<String>>> getTrackedSymptomIds() async =>
-      Right(_prefs.getStringList(_trackedSymptomsKey) ?? const []);
+      Right(_prefs.getStringList(_trackedKey) ?? []);
 
   @override
   Future<Either<Failure, void>> setTrackedSymptomIds(List<String> ids) async {
-    try {
-      await _prefs.setStringList(_trackedSymptomsKey, ids);
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Gagal menyimpan tracked symptoms: $e'));
-    }
+    await _prefs.setStringList(_trackedKey, ids);
+    return const Right(null);
+  }
+
+  static const _trackedLifestyleKey = 'tracked_lifestyle_factor_ids';
+
+  @override
+  Future<Either<Failure, List<String>>> getTrackedLifestyleFactorIds() async =>
+      Right(_prefs.getStringList(_trackedLifestyleKey) ?? []);
+
+  @override
+  Future<Either<Failure, void>> setTrackedLifestyleFactorIds(
+    List<String> ids,
+  ) async {
+    await _prefs.setStringList(_trackedLifestyleKey, ids);
+    return const Right(null);
   }
 }

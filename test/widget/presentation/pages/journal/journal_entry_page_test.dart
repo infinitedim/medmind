@@ -14,21 +14,21 @@ void main() {
         expect(find.byType(JournalEntryPage), findsOneWidget);
       });
 
-      testWidgets('AppBar menampilkan judul "New Entry"', (tester) async {
+      testWidgets('menampilkan tab navigasi Mood', (tester) async {
         await tester.pumpApp(const JournalEntryPage());
-        expect(find.text('New Entry'), findsOneWidget);
+        expect(find.text('Mood'), findsOneWidget);
       });
 
-      testWidgets('menampilkan teks "Journal Entry Form"', (tester) async {
+      testWidgets('menampilkan TabBar dengan 4 tab', (tester) async {
         await tester.pumpApp(const JournalEntryPage());
-        expect(find.text('Journal Entry Form'), findsOneWidget);
+        expect(find.byType(TabBar), findsOneWidget);
       });
     });
 
     group('mode Edit Entry (dengan entryId)', () {
-      testWidgets('AppBar menampilkan judul "Edit Entry"', (tester) async {
+      testWidgets('menampilkan TabBar saat edit mode', (tester) async {
         await tester.pumpApp(const JournalEntryPage(entryId: 'test-id-123'));
-        expect(find.text('Edit Entry'), findsOneWidget);
+        expect(find.byType(TabBar), findsOneWidget);
       });
 
       testWidgets('tidak menampilkan "New Entry" saat edit mode', (

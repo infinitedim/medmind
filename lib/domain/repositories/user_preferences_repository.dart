@@ -16,4 +16,7 @@ abstract class UserPreferencesRepository {
 
   Future<Either<Failure, List<String>>> getTrackedSymptomIds();
   Future<Either<Failure, void>> setTrackedSymptomIds(List<String> ids);
+
+  Future<Either<Failure, List<String>>> getTrackedLifestyleFactorIds();
+  Future<Either<Failure, void>> setTrackedLifestyleFactorIds(List<String> ids);
 }

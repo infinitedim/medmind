@@ -15,7 +15,8 @@ class HealthConnectRepositoryImpl implements HealthConnectRepository {
   @override
   Future<Either<Failure, bool>> checkAvailability() async {
     try {
-      return Right(await _channel.isAvailable());
+      final result = await _channel.isAvailable();
+      return Right(result);
     } on HealthConnectException catch (e) {
       return Left(HealthConnectFailure(e.message));
     }
@@ -24,7 +25,8 @@ class HealthConnectRepositoryImpl implements HealthConnectRepository {
   @override
   Future<Either<Failure, bool>> requestPermissions() async {
     try {
-      return Right(await _channel.requestPermissions());
+      final result = await _channel.requestPermissions();
+      return Right(result);
     } on HealthConnectException catch (e) {
       return Left(HealthConnectFailure(e.message));
     }
@@ -47,6 +49,26 @@ class HealthConnectRepositoryImpl implements HealthConnectRepository {
     }
   }
 
+  SleepRecord _sessionToRecord(SleepSession session) {
+    final totalMinutes = session.endTime
+        .difference(session.startTime)
+        .inMinutes;
+    final deepMinutes = session.stages
+        .where((s) => s.type == 5)
+        .fold<int>(0, (sum, s) => sum + s.duration.inMinutes);
+    final disturbances =
+        session.stages.where((s) => s.type == 1).length;
+    final quality = totalMinutes > 0
+        ? (deepMinutes / totalMinutes * 10).round().clamp(1, 10)
+        : 1;
+    return SleepRecord(
+      bedTime: session.startTime,
+      wakeTime: session.endTime,
+      quality: quality,
+      disturbances: disturbances,
+    );
+  }
+
   @override
   Future<Either<Failure, Map<DateTime, int>>> importStepData({
     DateTime? startDate,
@@ -54,21 +76,17 @@ class HealthConnectRepositoryImpl implements HealthConnectRepository {
   }) async {
     try {
       final now = DateTime.now();
-      final from = DateTime(
-        (startDate ?? now.subtract(const Duration(days: 30))).year,
-        (startDate ?? now.subtract(const Duration(days: 30))).month,
-        (startDate ?? now.subtract(const Duration(days: 30))).day,
-      );
-      final to = DateTime(now.year, now.month, now.day);
+      final from = startDate ?? now.subtract(const Duration(days: 30));
+      final to = endDate ?? now;
       final result = <DateTime, int>{};
-      var cursor = from;
-      while (!cursor.isAfter(endDate ?? to)) {
+      var cursor = DateTime(from.year, from.month, from.day);
+      while (!cursor.isAfter(to)) {
         final dayEnd = cursor.add(const Duration(days: 1));
         final steps = await _channel.readSteps(
           startTime: cursor,
           endTime: dayEnd,
         );
-        if (steps > 0) result[cursor] = steps;
+        result[cursor] = steps;
         cursor = dayEnd;
       }
       return Right(result);
@@ -80,25 +98,6 @@ class HealthConnectRepositoryImpl implements HealthConnectRepository {
   @override
   Future<Either<Failure, void>> exportSymptomData(
     List<JournalEntry> entries,
-  ) async => const Right(null);
-
-  // ─── Private helpers ─────────────────────────────────────────────────────
-
-  SleepRecord _sessionToRecord(SleepSession session) {
-    final totalMinutes = session.endTime
-        .difference(session.startTime)
-        .inMinutes
-        .clamp(1, 1440);
-    final deepMinutes = session.stages
-        .where((s) => s.type == 5)
-        .fold(0, (sum, s) => sum + s.duration.inMinutes);
-    final quality = ((deepMinutes / totalMinutes) * 10).round().clamp(1, 10);
-    final disturbances = session.stages.where((s) => s.type == 1).length;
-    return SleepRecord(
-      bedTime: session.startTime,
-      wakeTime: session.endTime,
-      quality: quality,
-      disturbances: disturbances,
-    );
-  }
+  ) async =>
+      const Right(null);
 }

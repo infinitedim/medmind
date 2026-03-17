@@ -13,9 +13,9 @@ void main() {
       expect(find.byType(HomePage), findsOneWidget);
     });
 
-    testWidgets('menampilkan teks "Home"', (tester) async {
+    testWidgets('menampilkan teks "MedMind"', (tester) async {
       await tester.pumpApp(const HomePage());
-      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('MedMind'), findsOneWidget);
     });
 
     testWidgets('background adalah Scaffold', (tester) async {

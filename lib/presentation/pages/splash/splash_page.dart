@@ -8,8 +8,8 @@ import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
 import 'package:medmind/core/di/injection.dart';
 import 'package:medmind/core/services/biometric_auth_service.dart';
+import 'package:medmind/domain/repositories/user_preferences_repository.dart';
 import 'package:medmind/platform/keystore_channel.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // ---------------------------------------------------------------------------
 // State machine
@@ -76,15 +76,18 @@ class _SplashPageState extends State<SplashPage> {
     }
 
     // STEP 2 — onboarding
-    final prefs = await SharedPreferences.getInstance();
+    final repo = getIt<UserPreferencesRepository>();
+    final onboardingResult = await repo.isOnboardingComplete();
     if (!mounted) return;
-    if (prefs.getBool('first_launch_complete') != true) {
+    final onboardingComplete = onboardingResult.fold((_) => false, (v) => v);
+    if (!onboardingComplete) {
       context.go(RouteNames.onboarding);
       return;
     }
 
     // STEP 3 — biometric
-    final biometricEnabled = await _bioService.isEnabled();
+    final biometricResult = await repo.isBiometricEnabled();
+    final biometricEnabled = biometricResult.fold((_) => false, (v) => v);
     if (!mounted) return;
     if (!biometricEnabled) {
       context.go(RouteNames.home);

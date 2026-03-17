@@ -20,6 +20,8 @@ final getIt = GetIt.instance;
 @InjectableInit()
 Future<void> configureDependencies() async => getIt.init();
 
+// ─── App Module ─────────────────────────────────────────────────────────────
+
 /// Module yang mendaftarkan dependensi eksternal / platform ke GetIt.
 @module
 abstract class AppModule {
@@ -28,6 +30,10 @@ abstract class AppModule {
   /// deprecated oleh Google; data lama dimigrasikan otomatis saat first access.
   @lazySingleton
   FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
+
+  @preResolve
+  @lazySingleton
+  Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
 
   /// Membuka dan mengembalikan instance [Isar] yang sudah di-encrypt.
   ///
@@ -40,8 +46,4 @@ abstract class AppModule {
   @preResolve
   @lazySingleton
   Future<Isar> isar(KeystoreChannel keystore) => IsarDatabase.open(keystore);
-
-  @preResolve
-  @lazySingleton
-  Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
 }
