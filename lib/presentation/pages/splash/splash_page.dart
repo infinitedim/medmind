@@ -8,6 +8,7 @@ import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
 import 'package:medmind/core/di/injection.dart';
 import 'package:medmind/core/services/biometric_auth_service.dart';
+import 'package:medmind/data/seed/symptom_seeder.dart';
 import 'package:medmind/domain/repositories/user_preferences_repository.dart';
 import 'package:medmind/platform/keystore_channel.dart';
 
@@ -15,7 +16,7 @@ import 'package:medmind/platform/keystore_channel.dart';
 // State machine
 // ---------------------------------------------------------------------------
 
-enum _SplashState { initializing, awaitingBiometric, error }
+enum _SplashState { initializing, finishing, awaitingBiometric, error }
 
 // ---------------------------------------------------------------------------
 // Page
@@ -31,8 +32,9 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
   _SplashState _state = _SplashState.initializing;
   String? _errorMessage;
+  double _progress = 0.0;
+  String _stepLabel = 'Memuat...';
 
-  // BiometricAuthService has no DI deps — instantiated directly once.
   final _bioService = BiometricAuthService();
 
   @override
@@ -53,17 +55,37 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
-  /// STEP 1 → keystore init
-  /// STEP 2 → onboarding check
-  /// STEP 3 → biometric check
+  void _setProgress(double value, String label) {
+    if (!mounted) return;
+    setState(() {
+      _progress = value;
+      _stepLabel = label;
+    });
+  }
+
+  /// Runs all init steps with progress tracking.
+  /// Waits a minimum of [_kMinSplashMs] so brand animations finish playing.
   Future<void> _runInitSequence() async {
     if (!mounted) return;
     setState(() {
       _state = _SplashState.initializing;
+      _progress = 0.0;
+      _stepLabel = 'Memuat...';
       _errorMessage = null;
     });
 
-    // STEP 1 — keystore
+    final startTime = DateTime.now();
+
+    // STEP 1 — seed default symptoms (fast DB write, non-fatal)
+    _setProgress(0.0, 'Menyiapkan data...');
+    try {
+      await seedDefaultSymptoms();
+    } catch (_) {
+      // Non-fatal: proceed even if seeding fails
+    }
+
+    // STEP 2 — keystore / encryption init
+    _setProgress(0.30, 'Menginisialisasi enkripsi...');
     try {
       await getIt<KeystoreChannel>().getOrCreateKey();
     } catch (e) {
@@ -75,20 +97,39 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
-    // STEP 2 — onboarding
+    // STEP 3 — read preferences
+    _setProgress(0.60, 'Memeriksa akun...');
     final repo = getIt<UserPreferencesRepository>();
     final onboardingResult = await repo.isOnboardingComplete();
     if (!mounted) return;
+
+    _setProgress(0.80, 'Hampir selesai...');
+    final biometricResult = await repo.isBiometricEnabled();
+    if (!mounted) return;
+
+    _setProgress(1.0, 'Selesai');
+
+    // Guarantee the brand animation (≈750ms) has time to play
+    const kMinSplash = Duration(milliseconds: 1600);
+    final elapsed = DateTime.now().difference(startTime);
+    if (elapsed < kMinSplash) {
+      await Future.delayed(kMinSplash - elapsed);
+    }
+    if (!mounted) return;
+
+    // Brief circular spinner before navigating (visual cue that work finished)
+    setState(() => _state = _SplashState.finishing);
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+
+    // Navigate
     final onboardingComplete = onboardingResult.fold((_) => false, (v) => v);
     if (!onboardingComplete) {
       context.go(RouteNames.onboarding);
       return;
     }
 
-    // STEP 3 — biometric
-    final biometricResult = await repo.isBiometricEnabled();
     final biometricEnabled = biometricResult.fold((_) => false, (v) => v);
-    if (!mounted) return;
     if (!biometricEnabled) {
       context.go(RouteNames.home);
       return;
@@ -132,12 +173,19 @@ class _SplashPageState extends State<SplashPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const _BrandBlock(),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 48),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) =>
+                        FadeTransition(opacity: animation, child: child),
                     child: switch (_state) {
-                      _SplashState.initializing => const _LoadingIndicator(
-                        key: ValueKey('loading'),
+                      _SplashState.initializing => _LoadingBar(
+                        key: const ValueKey('bar'),
+                        progress: _progress,
+                        label: _stepLabel,
+                      ),
+                      _SplashState.finishing => const _CircularIndicator(
+                        key: ValueKey('spinner'),
                       ),
                       _SplashState.awaitingBiometric => _BiometricPrompt(
                         key: const ValueKey('biometric'),
@@ -162,7 +210,7 @@ class _SplashPageState extends State<SplashPage> {
 }
 
 // ---------------------------------------------------------------------------
-// Sub-widgets — private, stateless, zero unnecessary rebuilds
+// Sub-widgets
 // ---------------------------------------------------------------------------
 
 class _BrandBlock extends StatelessWidget {
@@ -202,8 +250,42 @@ class _BrandBlock extends StatelessWidget {
   }
 }
 
-class _LoadingIndicator extends StatelessWidget {
-  const _LoadingIndicator({super.key});
+/// Animated progress bar that tweens smoothly to [progress] (0.0 – 1.0).
+class _LoadingBar extends StatelessWidget {
+  const _LoadingBar({super.key, required this.progress, required this.label});
+
+  final double progress;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: progress),
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeOut,
+          builder: (context, value, _) => LinearProgressIndicator(
+            value: value,
+            backgroundColor: AppColors.zinc800,
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.teal500),
+            minHeight: 2,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          label,
+          style: AppTypography.caption.copyWith(color: AppColors.zinc600),
+        ),
+      ],
+    ).animate().fadeIn(delay: 400.ms, duration: 350.ms);
+  }
+}
+
+class _CircularIndicator extends StatelessWidget {
+  const _CircularIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +296,7 @@ class _LoadingIndicator extends StatelessWidget {
         strokeWidth: 2,
         color: AppColors.teal500,
       ),
-    ).animate().fadeIn(delay: 400.ms, duration: 300.ms);
+    );
   }
 }
 
