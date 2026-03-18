@@ -67,7 +67,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i966.KeystoreChannel(gh<_i558.FlutterSecureStorage>()),
     );
     gh.lazySingleton<_i153.UserPreferencesRepository>(
-      () => _i634.UserPreferencesRepositoryImpl(gh<_i460.SharedPreferences>()),
+      () => _i634.UserPreferencesRepositoryImpl(
+        gh<_i460.SharedPreferences>(),
+        gh<_i558.FlutterSecureStorage>(),
+      ),
     );
     await gh.lazySingletonAsync<_i338.Isar>(
       () => appModule.isar(gh<_i966.KeystoreChannel>()),

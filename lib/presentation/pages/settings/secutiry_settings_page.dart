@@ -1,32 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:medmind/app/routes/route_names.dart';
 import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
-import 'package:medmind/core/services/biometric_auth_service.dart';
-
-final _secBiometricServiceProvider = Provider<BiometricAuthService>(
-  (_) => BiometricAuthService(),
-);
-
-final _secBiometricAvailableProvider = FutureProvider<bool>((ref) {
-  return ref.read(_secBiometricServiceProvider).isAvailable();
-});
-
-final _secBiometricEnabledProvider =
-    AsyncNotifierProvider<_SecBiometricNotifier, bool>(
-      _SecBiometricNotifier.new,
-    );
-
-class _SecBiometricNotifier extends AsyncNotifier<bool> {
-  @override
-  Future<bool> build() => ref.read(_secBiometricServiceProvider).isEnabled();
-
-  Future<void> toggle({required bool enabled}) async {
-    await ref.read(_secBiometricServiceProvider).setEnabled(enabled: enabled);
-    state = AsyncValue.data(enabled);
-  }
-}
+import 'package:medmind/presentation/providers/auth_providers.dart';
 
 class SecuritySettingsPage extends ConsumerWidget {
   const SecuritySettingsPage({super.key});
@@ -99,8 +78,9 @@ class SecuritySettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final biometricAvailable = ref.watch(_secBiometricAvailableProvider);
-    final biometricEnabled = ref.watch(_secBiometricEnabledProvider);
+    final biometricAvailable = ref.watch(biometricAvailableProvider);
+    final biometricEnabled = ref.watch(biometricEnabledNotifierProvider);
+    final pinEnabled = ref.watch(pinEnabledNotifierProvider);
 
     return Scaffold(
       backgroundColor: AppColors.zinc950,
@@ -122,40 +102,89 @@ class SecuritySettingsPage extends ConsumerWidget {
               color: AppColors.zinc900,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: biometricAvailable.when(
-              data: (available) {
-                if (!available) {
-                  return ListTile(
-                    leading: const Icon(
-                      LucideIcons.fingerprint,
-                      color: AppColors.zinc600,
-                    ),
-                    title: Text(
-                      'Biometrik tidak tersedia',
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.zinc500,
+            child: Column(
+              children: [
+                // Biometric toggle
+                biometricAvailable.when(
+                  data: (available) {
+                    if (!available) {
+                      return ListTile(
+                        leading: const Icon(
+                          LucideIcons.fingerprint,
+                          color: AppColors.zinc600,
+                        ),
+                        title: Text(
+                          'Biometrik tidak tersedia',
+                          style: AppTypography.body.copyWith(
+                            color: AppColors.zinc500,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                      );
+                    }
+                    return SwitchListTile(
+                      value: biometricEnabled.asData?.value ?? false,
+                      onChanged: biometricEnabled.isLoading
+                          ? null
+                          : (value) => ref
+                                .read(biometricEnabledNotifierProvider.notifier)
+                                .toggle(enabled: value),
+                      secondary: const Icon(
+                        LucideIcons.fingerprint,
+                        color: AppColors.zinc400,
                       ),
+                      title: Text('Kunci Biometrik', style: AppTypography.body),
+                      subtitle: Text(
+                        'Gunakan sidik jari atau wajah untuk membuka aplikasi',
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.zinc500,
+                        ),
+                      ),
+                      activeThumbColor: AppColors.teal500,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                    );
+                  },
+                  loading: () => const ListTile(
+                    leading: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                  );
-                }
-                return SwitchListTile(
-                  value: biometricEnabled.asData?.value ?? false,
-                  onChanged: biometricEnabled.isLoading
+                    title: Text('Memuat...'),
+                  ),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+                Divider(height: 1, color: AppColors.zinc800, indent: 52),
+                // PIN toggle
+                SwitchListTile(
+                  value: pinEnabled.asData?.value ?? false,
+                  onChanged: pinEnabled.isLoading
                       ? null
-                      : (value) => ref
-                            .read(_secBiometricEnabledProvider.notifier)
-                            .toggle(enabled: value),
+                      : (value) {
+                          if (value) {
+                            context.push(
+                              RouteNames.pinLock,
+                              extra: {'mode': 'create'},
+                            );
+                          } else {
+                            ref
+                                .read(pinEnabledNotifierProvider.notifier)
+                                .toggle(enabled: false);
+                          }
+                        },
                   secondary: const Icon(
-                    LucideIcons.fingerprint,
+                    LucideIcons.keyRound,
                     color: AppColors.zinc400,
                   ),
-                  title: Text('Kunci Biometrik', style: AppTypography.body),
+                  title: Text('Kunci PIN', style: AppTypography.body),
                   subtitle: Text(
-                    'Gunakan sidik jari atau wajah untuk membuka aplikasi',
+                    'PIN 4 digit sebagai fallback biometrik',
                     style: AppTypography.caption.copyWith(
                       color: AppColors.zinc500,
                     ),
@@ -165,17 +194,8 @@ class SecuritySettingsPage extends ConsumerWidget {
                     horizontal: 16,
                     vertical: 4,
                   ),
-                );
-              },
-              loading: () => const ListTile(
-                leading: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                title: Text('Memuat...'),
-              ),
-              error: (_, _) => const SizedBox.shrink(),
+              ],
             ),
           ),
           const SizedBox(height: 32),

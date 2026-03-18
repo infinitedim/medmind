@@ -16,4 +16,6 @@ abstract final class RouteNames {
   static const reminders = '/settings/reminders';
   static const healthConnect = '/settings/health-connect';
   static const exportData = '/settings/export';
+
+  static const pinLock = '/pin-lock';
 }

@@ -23,8 +23,13 @@ class OnboardingPage extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: AssetImage('assets/icon/medmind-logo.png'),
+                    fit: BoxFit.fill,
+                  ),
+                  shape: BoxShape.rectangle,
                   color: AppColors.teal500_10,
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.teal500.withValues(alpha: 0.3),
@@ -32,11 +37,6 @@ class OnboardingPage extends StatelessWidget {
                       spreadRadius: 4,
                     ),
                   ],
-                ),
-                child: const Icon(
-                  LucideIcons.brain,
-                  size: 40,
-                  color: AppColors.teal400,
                 ),
               ),
               const SizedBox(height: 24),

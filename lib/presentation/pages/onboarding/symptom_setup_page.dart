@@ -265,7 +265,7 @@ class _SymptomSetupPageState extends ConsumerState<SymptomSetupPage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
-                  '\${selected.length} gejala dipilih',
+                  '${selected.length} gejala dipilih',
                   style: AppTypography.captionMedium.copyWith(
                     color: AppColors.teal400,
                   ),

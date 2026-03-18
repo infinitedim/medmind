@@ -5,6 +5,12 @@ abstract class UserPreferencesRepository {
   Future<Either<Failure, bool>> isBiometricEnabled();
   Future<Either<Failure, void>> setBiometricEnabled({required bool enabled});
 
+  Future<Either<Failure, bool>> isPinEnabled();
+  Future<Either<Failure, void>> setPinEnabled({required bool enabled});
+  Future<Either<Failure, String?>> getPin();
+  Future<Either<Failure, void>> setPin(String pin);
+  Future<Either<Failure, void>> clearPin();
+
   Future<Either<Failure, bool>> isOnboardingComplete();
   Future<Either<Failure, void>> completeOnboarding();
 

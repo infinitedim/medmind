@@ -34,6 +34,8 @@ class _SplashPageState extends State<SplashPage> {
   String? _errorMessage;
   double _progress = 0.0;
   String _stepLabel = 'Memuat...';
+  int _biometricFailures = 0;
+  bool _pinEnabled = false;
 
   final _bioService = BiometricAuthService();
 
@@ -105,6 +107,7 @@ class _SplashPageState extends State<SplashPage> {
 
     _setProgress(0.80, 'Hampir selesai...');
     final biometricResult = await repo.isBiometricEnabled();
+    final pinResult = await repo.isPinEnabled();
     if (!mounted) return;
 
     _setProgress(1.0, 'Selesai');
@@ -135,6 +138,8 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
+    _pinEnabled = pinResult.fold((_) => false, (v) => v);
+    _biometricFailures = 0;
     setState(() => _state = _SplashState.awaitingBiometric);
     await _showBiometricPrompt();
   }
@@ -143,12 +148,29 @@ class _SplashPageState extends State<SplashPage> {
     try {
       final authenticated = await _bioService.authenticate();
       if (!mounted) return;
-      if (authenticated) context.go(RouteNames.home);
-      // User cancelled → stay on awaitingBiometric; tap fingerprint to retry.
+      if (authenticated) {
+        context.go(RouteNames.home);
+        return;
+      }
+      // User cancelled — increment failure counter.
+      _biometricFailures++;
+      if (_biometricFailures >= 3) {
+        if (_pinEnabled) {
+          context.go(RouteNames.pinLock);
+        } else {
+          // No PIN configured — fail-open.
+          context.go(RouteNames.home);
+        }
+      }
+      // < 3 failures → stay on awaitingBiometric; user can tap to retry.
     } on PlatformException {
-      // Hardware unavailable / lockout → fail-open to home.
+      // Hardware unavailable / lockout → fall back to PIN if available.
       if (!mounted) return;
-      context.go(RouteNames.home);
+      if (_pinEnabled) {
+        context.go(RouteNames.pinLock);
+      } else {
+        context.go(RouteNames.home);
+      }
     }
   }
 

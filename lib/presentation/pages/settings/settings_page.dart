@@ -5,40 +5,15 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:medmind/app/routes/route_names.dart';
 import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
-import 'package:medmind/core/services/biometric_auth_service.dart';
-
-final _biometricServiceProvider = Provider<BiometricAuthService>(
-  (_) => BiometricAuthService(),
-);
-
-final _biometricAvailableProvider = FutureProvider<bool>((ref) {
-  return ref.read(_biometricServiceProvider).isAvailable();
-});
-
-final _biometricEnabledProvider =
-    AsyncNotifierProvider<_BiometricEnabledNotifier, bool>(
-      _BiometricEnabledNotifier.new,
-    );
-
-class _BiometricEnabledNotifier extends AsyncNotifier<bool> {
-  @override
-  Future<bool> build() {
-    return ref.read(_biometricServiceProvider).isEnabled();
-  }
-
-  Future<void> toggle({required bool enabled}) async {
-    await ref.read(_biometricServiceProvider).setEnabled(enabled: enabled);
-    state = AsyncValue.data(enabled);
-  }
-}
+import 'package:medmind/presentation/providers/auth_providers.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final biometricAvailable = ref.watch(_biometricAvailableProvider);
-    final biometricEnabled = ref.watch(_biometricEnabledProvider);
+    final biometricAvailable = ref.watch(biometricAvailableProvider);
+    final biometricEnabled = ref.watch(biometricEnabledNotifierProvider);
 
     return Scaffold(
       backgroundColor: AppColors.zinc950,
@@ -108,7 +83,7 @@ class SettingsPage extends ConsumerWidget {
                       onChanged: biometricEnabled.isLoading
                           ? null
                           : (value) => ref
-                                .read(_biometricEnabledProvider.notifier)
+                                .read(biometricEnabledNotifierProvider.notifier)
                                 .toggle(enabled: value),
                       title: Text('Kunci Biometrik', style: AppTypography.body),
                       subtitle: Text(

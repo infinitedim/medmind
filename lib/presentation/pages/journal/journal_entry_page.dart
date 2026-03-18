@@ -286,15 +286,15 @@ class _JournalEntryPageState extends ConsumerState<JournalEntryPage>
                           color: Colors.white,
                         ),
                       )
-                    : Text(
-                        'Simpan',
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: Colors.white,
+                    : SizedBox(
+                        child: Tooltip(
+                          message: 'Simpan',
+                          child: Icon(LucideIcons.save, color: Colors.white),
                         ),
                       ),
-                icon: formAsync.asData!.value.isSaving
-                    ? null
-                    : const Icon(LucideIcons.save, color: Colors.white),
+                // icon: formAsync.asData!.value.isSaving
+                //     ? null
+                //     : const Icon(LucideIcons.save, color: Colors.white),
               )
             : null,
       ),

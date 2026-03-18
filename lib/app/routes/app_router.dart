@@ -15,6 +15,7 @@ import 'package:medmind/presentation/pages/settings/health_connect_settings_page
 import 'package:medmind/presentation/pages/settings/reminder_settings_page.dart';
 import 'package:medmind/presentation/pages/settings/secutiry_settings_page.dart';
 import 'package:medmind/presentation/pages/settings/settings_page.dart';
+import 'package:medmind/presentation/pages/auth/pin_entry_page.dart';
 import 'package:medmind/presentation/pages/splash/splash_page.dart';
 import 'package:medmind/presentation/providers/preference_providers.dart';
 import 'package:medmind/presentation/shared/app_bottom_nav.dart';
@@ -47,6 +48,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashPage(),
       ),
       GoRoute(
+        path: RouteNames.pinLock,
+        builder: (context, state) => const PinEntryPage(),
+      ),
+      GoRoute(
         path: RouteNames.onboarding,
         builder: (context, state) => const OnboardingPage(),
         routes: [
@@ -65,18 +70,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       ShellRoute(
-        builder: (context, state, child) =>
-            AppShell(state: state, child: child),
+        builder: (context, state, child) {
+          return AppShell(state: state, child: child);
+        },
         routes: [
           GoRoute(
             path: RouteNames.home,
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: HomePage()),
+            pageBuilder: (context, state) {
+              return const NoTransitionPage(child: HomePage());
+            },
           ),
           GoRoute(
             path: RouteNames.journal,
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: JournalListPage()),
+            pageBuilder: (context, state) {
+              return const NoTransitionPage(child: JournalListPage());
+            },
             routes: [
               GoRoute(
                 path: 'new',
@@ -93,8 +101,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: RouteNames.insights,
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: InsightsPage()),
+            pageBuilder: (context, state) {
+              return const NoTransitionPage(child: InsightsPage());
+            },
           ),
           GoRoute(
             path: RouteNames.settings,

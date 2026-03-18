@@ -56,10 +56,10 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: assets/icon/app_icon.png
+  image_path: assets/icon/medmind-logo.png
   min_sdk_android: 26
   adaptive_icon_background: "#09090b"
-  adaptive_icon_foreground: assets/icon/app_icon_foreground.png
+  adaptive_icon_foreground: assets/icon/medmind-logo.png
 
 flutter_native_splash:
   color: "#09090b"

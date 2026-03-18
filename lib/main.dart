@@ -5,6 +5,8 @@ import 'package:medmind/core/di/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await configureDependencies();
+
   runApp(const ProviderScope(child: MedMindApp()));
 }

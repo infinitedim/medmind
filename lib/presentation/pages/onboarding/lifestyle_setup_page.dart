@@ -195,7 +195,7 @@ class _LifestyleSetupPageState extends ConsumerState<LifestyleSetupPage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
-                  '\${_selected.length} faktor dipilih',
+                  '${_selected.length} faktor dipilih',
                   style: AppTypography.captionMedium.copyWith(
                     color: AppColors.teal400,
                   ),

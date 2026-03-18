@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
-import 'package:medmind/core/services/biometric_auth_service.dart';
+import 'package:medmind/presentation/providers/auth_providers.dart';
 import 'package:medmind/presentation/providers/core_providers.dart';
 import 'package:medmind/presentation/providers/preference_providers.dart';
 
@@ -26,8 +26,7 @@ class _SecuritySetupPageState extends ConsumerState<SecuritySetupPage> {
   }
 
   Future<void> _checkBiometricAvailability() async {
-    final service = BiometricAuthService();
-    final available = await service.isAvailable();
+    final available = await ref.read(biometricAvailableProvider.future);
     if (mounted) setState(() => _biometricAvailable = available);
   }
 
@@ -143,8 +142,9 @@ class _SecuritySetupPageState extends ConsumerState<SecuritySetupPage> {
                     Expanded(
                       child: Text(
                         'Data dienkripsi menggunakan AES-256-GCM dengan kunci yang tersimpan di Android Keystore hardware. Tidak ada cloud sync — semua data hanya ada di perangkat ini.',
-                        style:
-                            AppTypography.small.copyWith(color: AppColors.teal300),
+                        style: AppTypography.small.copyWith(
+                          color: AppColors.teal300,
+                        ),
                       ),
                     ),
                   ],
@@ -186,8 +186,9 @@ class _SecuritySetupPageState extends ConsumerState<SecuritySetupPage> {
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed:
-                    _finishing ? null : () => _finish(skipBiometric: true),
+                onPressed: _finishing
+                    ? null
+                    : () => _finish(skipBiometric: true),
                 child: Text(
                   'Lewati pengaturan keamanan',
                   style: AppTypography.body.copyWith(color: AppColors.zinc500),

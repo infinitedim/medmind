@@ -165,7 +165,7 @@ class _JournalListPageState extends ConsumerState<JournalListPage> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context, false),
+                    onPressed: () => Navigator.of(context).pop(false),
                     child: Text(
                       'Batal',
                       style: AppTypography.body.copyWith(
@@ -174,7 +174,7 @@ class _JournalListPageState extends ConsumerState<JournalListPage> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => Navigator.pop(context, true),
+                    onPressed: () => Navigator.of(context).pop(true),
                     child: Text(
                       'Hapus',
                       style: AppTypography.body.copyWith(
