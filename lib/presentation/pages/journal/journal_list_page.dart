@@ -156,7 +156,7 @@ class _JournalListPageState extends ConsumerState<JournalListPage> {
           confirmDismiss: (_) async {
             return await showDialog<bool>(
               context: context,
-              builder: (_) => AlertDialog(
+              builder: (dialogCtx) => AlertDialog(
                 backgroundColor: AppColors.zinc900,
                 title: Text('Hapus entri?', style: AppTypography.h3),
                 content: Text(
@@ -165,7 +165,7 @@ class _JournalListPageState extends ConsumerState<JournalListPage> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
+                    onPressed: () => Navigator.of(dialogCtx).pop(false),
                     child: Text(
                       'Batal',
                       style: AppTypography.body.copyWith(
@@ -174,7 +174,7 @@ class _JournalListPageState extends ConsumerState<JournalListPage> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: () => Navigator.of(dialogCtx).pop(true),
                     child: Text(
                       'Hapus',
                       style: AppTypography.body.copyWith(

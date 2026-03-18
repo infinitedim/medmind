@@ -40,10 +40,8 @@ class LifestyleInput extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: factors.length,
-              separatorBuilder: (_, i) => const Divider(
-                color: AppColors.zinc800,
-                height: 1,
-              ),
+              separatorBuilder: (_, i) =>
+                  const Divider(color: AppColors.zinc800, height: 1),
               itemBuilder: (_, idx) {
                 final factor = factors[idx];
                 final log = form.lifestyleFactors
@@ -52,7 +50,8 @@ class LifestyleInput extends ConsumerWidget {
                 return _LifestyleFactorTile(
                   factor: factor,
                   log: log,
-                  onChanged: (updated) => notifier.addLifestyleFactorLog(updated),
+                  onChanged: (updated) =>
+                      notifier.addLifestyleFactorLog(updated),
                 );
               },
             ),
@@ -78,9 +77,21 @@ class _LifestyleFactorTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: switch (factor.type) {
-        FactorType.boolean => _BooleanTile(factor: factor, log: log, onChanged: onChanged),
-        FactorType.numeric => _NumericTile(factor: factor, log: log, onChanged: onChanged),
-        FactorType.scale => _ScaleTile(factor: factor, log: log, onChanged: onChanged),
+        FactorType.boolean => _BooleanTile(
+          factor: factor,
+          log: log,
+          onChanged: onChanged,
+        ),
+        FactorType.numeric => _NumericTile(
+          factor: factor,
+          log: log,
+          onChanged: onChanged,
+        ),
+        FactorType.scale => _ScaleTile(
+          factor: factor,
+          log: log,
+          onChanged: onChanged,
+        ),
       },
     );
   }
@@ -103,14 +114,11 @@ class _BooleanTile extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Text(factor.name, style: AppTypography.bodyMedium),
-        ),
+        Expanded(child: Text(factor.name, style: AppTypography.bodyMedium)),
         Switch(
           value: value,
-          onChanged: (v) => onChanged(
-            LifestyleFactorLog(factorId: factor.id, boolValue: v),
-          ),
+          onChanged: (v) =>
+              onChanged(LifestyleFactorLog(factorId: factor.id, boolValue: v)),
           activeThumbColor: AppColors.teal400,
           activeTrackColor: AppColors.teal700,
           inactiveThumbColor: AppColors.zinc600,
@@ -121,7 +129,7 @@ class _BooleanTile extends StatelessWidget {
   }
 }
 
-class _NumericTile extends StatelessWidget {
+class _NumericTile extends StatefulWidget {
   const _NumericTile({
     required this.factor,
     required this.log,
@@ -133,6 +141,38 @@ class _NumericTile extends StatelessWidget {
   final ValueChanged<LifestyleFactorLog> onChanged;
 
   @override
+  State<_NumericTile> createState() => _NumericTileState();
+}
+
+class _NumericTileState extends State<_NumericTile> {
+  late final TextEditingController _ctrl;
+  final FocusNode _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController(
+      text: widget.log?.numericValue?.toString() ?? '',
+    );
+  }
+
+  @override
+  void didUpdateWidget(_NumericTile old) {
+    super.didUpdateWidget(old);
+    // Avoid disrupting user while typing; only sync external/programmatic changes.
+    if (_focus.hasFocus) return;
+    final incoming = widget.log?.numericValue?.toString() ?? '';
+    if (_ctrl.text != incoming) _ctrl.text = incoming;
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -141,11 +181,13 @@ class _NumericTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(factor.name, style: AppTypography.bodyMedium),
-              if (factor.unit != null)
+              Text(widget.factor.name, style: AppTypography.bodyMedium),
+              if (widget.factor.unit != null)
                 Text(
-                  factor.unit!,
-                  style: AppTypography.caption.copyWith(color: AppColors.zinc500),
+                  widget.factor.unit!,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.zinc500,
+                  ),
                 ),
             ],
           ),
@@ -153,9 +195,8 @@ class _NumericTile extends StatelessWidget {
         SizedBox(
           width: 80,
           child: TextField(
-            controller: TextEditingController(
-              text: log?.numericValue?.toString() ?? '',
-            ),
+            controller: _ctrl,
+            focusNode: _focus,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
@@ -164,20 +205,30 @@ class _NumericTile extends StatelessWidget {
             textAlign: TextAlign.center,
             decoration: InputDecoration(
               hintText: '0',
-              hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.zinc600),
+              hintStyle: AppTypography.bodyMedium.copyWith(
+                color: AppColors.zinc600,
+              ),
               filled: true,
               fillColor: AppColors.zinc800,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 10,
+              ),
               isDense: true,
             ),
             onChanged: (v) {
               final parsed = double.tryParse(v);
               if (parsed != null) {
-                onChanged(LifestyleFactorLog(factorId: factor.id, numericValue: parsed));
+                widget.onChanged(
+                  LifestyleFactorLog(
+                    factorId: widget.factor.id,
+                    numericValue: parsed,
+                  ),
+                );
               }
             },
           ),
@@ -210,7 +261,9 @@ class _ScaleTile extends StatelessWidget {
             Text(factor.name, style: AppTypography.bodyMedium),
             Text(
               '$value/10',
-              style: AppTypography.captionMedium.copyWith(color: AppColors.teal400),
+              style: AppTypography.captionMedium.copyWith(
+                color: AppColors.teal400,
+              ),
             ),
           ],
         ),

@@ -110,7 +110,7 @@ class _JournalEntryPageState extends ConsumerState<JournalEntryPage>
   Future<void> _deleteEntry() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.zinc900,
         title: Text('Hapus entri?', style: AppTypography.h3),
         content: Text(
@@ -119,14 +119,14 @@ class _JournalEntryPageState extends ConsumerState<JournalEntryPage>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogCtx, false),
             child: Text(
               'Batal',
               style: AppTypography.body.copyWith(color: AppColors.zinc400),
             ),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogCtx, true),
             child: Text(
               'Hapus',
               style: AppTypography.body.copyWith(color: AppColors.red400),

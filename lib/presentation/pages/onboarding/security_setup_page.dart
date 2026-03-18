@@ -117,7 +117,21 @@ class _SecuritySetupPageState extends ConsumerState<SecuritySetupPage> {
                       onChanged: _biometricAvailable
                           ? (v) => setState(() => _biometricEnabled = v)
                           : null,
-                      activeThumbColor: AppColors.teal500,
+                      thumbColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppColors.zinc50;
+                        }
+                        return AppColors.zinc500;
+                      }),
+                      trackColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppColors.teal500;
+                        }
+                        return AppColors.zinc700;
+                      }),
+                      trackOutlineColor: WidgetStateProperty.all(
+                        Colors.transparent,
+                      ),
                     ),
                   ],
                 ),

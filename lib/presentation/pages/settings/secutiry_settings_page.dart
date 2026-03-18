@@ -6,6 +6,7 @@ import 'package:medmind/app/routes/route_names.dart';
 import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
 import 'package:medmind/presentation/providers/auth_providers.dart';
+import 'package:medmind/presentation/widgets/settings_switch_tile.dart';
 
 class SecuritySettingsPage extends ConsumerWidget {
   const SecuritySettingsPage({super.key});
@@ -13,7 +14,7 @@ class SecuritySettingsPage extends ConsumerWidget {
   Future<void> _confirmDeleteAll(BuildContext context) async {
     final first = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.zinc900,
         title: Text('Hapus semua data?', style: AppTypography.h3),
         content: Text(
@@ -22,14 +23,14 @@ class SecuritySettingsPage extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogCtx, false),
             child: Text(
               'Batal',
               style: AppTypography.body.copyWith(color: AppColors.zinc400),
             ),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogCtx, true),
             child: Text(
               'Hapus permanen',
               style: AppTypography.body.copyWith(color: AppColors.red400),
@@ -43,7 +44,7 @@ class SecuritySettingsPage extends ConsumerWidget {
     // Second confirmation
     final second = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.zinc900,
         title: Text('Yakin?', style: AppTypography.h3),
         content: Text(
@@ -52,14 +53,14 @@ class SecuritySettingsPage extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogCtx, false),
             child: Text(
               'Batal',
               style: AppTypography.body.copyWith(color: AppColors.zinc400),
             ),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogCtx, true),
             child: Text(
               'Konfirmasi hapus',
               style: AppTypography.body.copyWith(color: AppColors.red500),
@@ -125,29 +126,18 @@ class SecuritySettingsPage extends ConsumerWidget {
                         ),
                       );
                     }
-                    return SwitchListTile(
+                    return SettingsSwitchTile(
+                      icon: LucideIcons.fingerprint,
+                      title: 'Kunci Biometrik',
+                      subtitle:
+                          'Gunakan sidik jari atau wajah untuk membuka aplikasi',
                       value: biometricEnabled.asData?.value ?? false,
+                      loading: biometricEnabled.isLoading,
                       onChanged: biometricEnabled.isLoading
                           ? null
                           : (value) => ref
                                 .read(biometricEnabledNotifierProvider.notifier)
                                 .toggle(enabled: value),
-                      secondary: const Icon(
-                        LucideIcons.fingerprint,
-                        color: AppColors.zinc400,
-                      ),
-                      title: Text('Kunci Biometrik', style: AppTypography.body),
-                      subtitle: Text(
-                        'Gunakan sidik jari atau wajah untuk membuka aplikasi',
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.zinc500,
-                        ),
-                      ),
-                      activeThumbColor: AppColors.teal500,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
                     );
                   },
                   loading: () => const ListTile(
@@ -162,8 +152,12 @@ class SecuritySettingsPage extends ConsumerWidget {
                 ),
                 Divider(height: 1, color: AppColors.zinc800, indent: 52),
                 // PIN toggle
-                SwitchListTile(
+                SettingsSwitchTile(
+                  icon: LucideIcons.keyRound,
+                  title: 'Kunci PIN',
+                  subtitle: 'PIN 4 digit sebagai fallback biometrik',
                   value: pinEnabled.asData?.value ?? false,
+                  loading: pinEnabled.isLoading,
                   onChanged: pinEnabled.isLoading
                       ? null
                       : (value) {
@@ -178,22 +172,6 @@ class SecuritySettingsPage extends ConsumerWidget {
                                 .toggle(enabled: false);
                           }
                         },
-                  secondary: const Icon(
-                    LucideIcons.keyRound,
-                    color: AppColors.zinc400,
-                  ),
-                  title: Text('Kunci PIN', style: AppTypography.body),
-                  subtitle: Text(
-                    'PIN 4 digit sebagai fallback biometrik',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.zinc500,
-                    ),
-                  ),
-                  activeThumbColor: AppColors.teal500,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
                 ),
               ],
             ),

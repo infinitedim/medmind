@@ -31,6 +31,7 @@ class _VitalsInputState extends ConsumerState<VitalsInput> {
     super.initState();
     _checkHc();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final form = ref.read(journalFormProvider(widget.entryId)).asData?.value;
       if (form?.vitalRecord != null) {
         final v = form!.vitalRecord!;
@@ -54,7 +55,9 @@ class _VitalsInputState extends ConsumerState<VitalsInput> {
   Future<void> _checkHc() async {
     final repo = ref.read(healthConnectRepositoryProvider);
     final result = await repo.checkAvailability();
-    if (mounted) setState(() => _hcAvailable = result.fold((_) => false, (v) => v));
+    if (mounted) {
+      setState(() => _hcAvailable = result.fold((_) => false, (v) => v));
+    }
   }
 
   Future<void> _importFromHc() async {
@@ -64,13 +67,10 @@ class _VitalsInputState extends ConsumerState<VitalsInput> {
       final now = DateTime.now();
       final start = DateTime(now.year, now.month, now.day);
       final result = await repo.importStepData(startDate: start, endDate: now);
-      result.fold(
-        (_) {},
-        (map) {
-          final total = map.values.fold<int>(0, (a, b) => a + b);
-          if (total > 0) _stepsCtrl.text = total.toString();
-        },
-      );
+      result.fold((_) {}, (map) {
+        final total = map.values.fold<int>(0, (a, b) => a + b);
+        if (total > 0) _stepsCtrl.text = total.toString();
+      });
       _saveVitals(source: VitalSource.healthConnect);
     } finally {
       if (mounted) setState(() => _importing = false);
@@ -143,7 +143,9 @@ class _VitalsInputState extends ConsumerState<VitalsInput> {
                   const SizedBox(width: 10),
                   Text(
                     _importing ? 'Importing...' : 'Import from Health Connect',
-                    style: AppTypography.bodyMedium.copyWith(color: AppColors.teal300),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.teal300,
+                    ),
                   ),
                 ],
               ),
@@ -236,7 +238,10 @@ class _VitalField extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: AppTypography.small.copyWith(color: AppColors.zinc400)),
+              Text(
+                label,
+                style: AppTypography.small.copyWith(color: AppColors.zinc400),
+              ),
               const SizedBox(height: 2),
               TextField(
                 controller: controller,
@@ -247,9 +252,13 @@ class _VitalField extends StatelessWidget {
                 style: AppTypography.bodyMedium,
                 decoration: InputDecoration(
                   hintText: '—',
-                  hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.zinc600),
+                  hintStyle: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.zinc600,
+                  ),
                   suffixText: unit,
-                  suffixStyle: AppTypography.caption.copyWith(color: AppColors.zinc500),
+                  suffixStyle: AppTypography.caption.copyWith(
+                    color: AppColors.zinc500,
+                  ),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,

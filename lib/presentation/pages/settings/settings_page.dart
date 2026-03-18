@@ -6,6 +6,7 @@ import 'package:medmind/app/routes/route_names.dart';
 import 'package:medmind/app/theme/app_colors.dart';
 import 'package:medmind/app/theme/app_typography.dart';
 import 'package:medmind/presentation/providers/auth_providers.dart';
+import 'package:medmind/presentation/widgets/settings_switch_tile.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -78,29 +79,17 @@ class SettingsPage extends ConsumerWidget {
                 biometricAvailable.when(
                   data: (available) {
                     if (!available) return const SizedBox.shrink();
-                    return SwitchListTile(
+                    return SettingsSwitchTile(
+                      icon: LucideIcons.fingerprint,
+                      title: 'Kunci Biometrik',
+                      subtitle: 'Sidik jari atau wajah',
                       value: biometricEnabled.asData?.value ?? false,
+                      loading: biometricEnabled.isLoading,
                       onChanged: biometricEnabled.isLoading
                           ? null
                           : (value) => ref
                                 .read(biometricEnabledNotifierProvider.notifier)
                                 .toggle(enabled: value),
-                      title: Text('Kunci Biometrik', style: AppTypography.body),
-                      subtitle: Text(
-                        'Sidik jari atau wajah',
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.zinc500,
-                        ),
-                      ),
-                      secondary: const Icon(
-                        LucideIcons.fingerprint,
-                        color: AppColors.zinc400,
-                      ),
-                      activeThumbColor: AppColors.teal500,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
                     );
                   },
                   loading: () => const SizedBox.shrink(),

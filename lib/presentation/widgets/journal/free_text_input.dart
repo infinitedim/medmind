@@ -22,6 +22,7 @@ class _FreeTextInputState extends ConsumerState<FreeTextInput> {
     super.initState();
     _ctrl = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final form = ref.read(journalFormProvider(widget.entryId)).asData?.value;
       if (form?.freeText != null) {
         _ctrl.text = form!.freeText!;

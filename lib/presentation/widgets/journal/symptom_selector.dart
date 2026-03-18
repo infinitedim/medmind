@@ -31,16 +31,24 @@ class _SymptomSelectorState extends ConsumerState<SymptomSelector> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Symptoms', style: AppTypography.h3),
-            formAsync.whenData((form) => Text(
-              '${form.symptoms.length} logged',
-              style: AppTypography.caption.copyWith(color: AppColors.teal400),
-            )).value ?? const SizedBox.shrink(),
+            formAsync
+                    .whenData(
+                      (form) => Text(
+                        '${form.symptoms.length} logged',
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.teal400,
+                        ),
+                      ),
+                    )
+                    .value ??
+                const SizedBox.shrink(),
           ],
         ),
         const SizedBox(height: 12),
         symptomsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, e) => Text('Failed to load symptoms', style: AppTypography.body),
+          error: (_, e) =>
+              Text('Failed to load symptoms', style: AppTypography.body),
           data: (symptoms) {
             if (symptoms.isEmpty) {
               return Text(
@@ -152,27 +160,14 @@ class _SymptomSelectorState extends ConsumerState<SymptomSelector> {
               min: 1,
               max: 10,
               divisions: 9,
-              onChanged: (v) => notifier.addSymptomLog(
-                log.copyWith(severity: v.round()),
-              ),
+              onChanged: (v) =>
+                  notifier.addSymptomLog(log.copyWith(severity: v.round())),
             ),
           ),
           const SizedBox(height: 8),
-          TextField(
-            style: AppTypography.body,
-            decoration: InputDecoration(
-              hintText: 'Notes (optional)',
-              hintStyle: AppTypography.body.copyWith(color: AppColors.zinc600),
-              filled: true,
-              fillColor: AppColors.zinc800,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              isDense: true,
-            ),
-            controller: TextEditingController(text: log.notes ?? ''),
+          _SymptomNotesField(
+            key: ValueKey(_expandedSymptomId),
+            initialValue: log.notes,
             onChanged: (v) => notifier.addSymptomLog(
               log.copyWith(notes: v.isEmpty ? null : v),
             ),
@@ -194,6 +189,60 @@ class _SymptomSelectorState extends ConsumerState<SymptomSelector> {
     if (severity <= 6) return AppColors.severityModerate;
     if (severity <= 8) return AppColors.severityHigh;
     return AppColors.severitySevere;
+  }
+}
+
+class _SymptomNotesField extends StatefulWidget {
+  const _SymptomNotesField({
+    super.key,
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  final String? initialValue;
+  final ValueChanged<String> onChanged;
+
+  @override
+  State<_SymptomNotesField> createState() => _SymptomNotesFieldState();
+}
+
+class _SymptomNotesFieldState extends State<_SymptomNotesField> {
+  late final TextEditingController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController(text: widget.initialValue ?? '');
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _ctrl,
+      onChanged: widget.onChanged,
+      style: AppTypography.body,
+      decoration: InputDecoration(
+        hintText: 'Notes (optional)',
+        hintStyle: AppTypography.body.copyWith(color: AppColors.zinc600),
+        filled: true,
+        fillColor: AppColors.zinc800,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
+        isDense: true,
+      ),
+    );
   }
 }
 
