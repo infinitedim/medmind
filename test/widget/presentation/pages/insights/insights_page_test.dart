@@ -63,6 +63,7 @@ void main() {
     testWidgets('shows "Insights" header and TabBar when count = 14', (
       tester,
     ) async {
+      // ignore: unused_local_variable
       final mockRepo = MockJournalRepository();
       // journalEntriesCountProvider depends on journalEntriesProvider, but
       // we override journalEntriesCountProvider directly → repo not called.

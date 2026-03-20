@@ -6,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:medmind/core/enum/enum_collection.dart';
 import 'package:medmind/core/errors/failures.dart';
 import 'package:medmind/domain/entities/sleep_record.dart';
-import 'package:medmind/domain/entities/journal_entry.dart';
 import 'package:medmind/domain/entities/symptom.dart';
 import 'package:medmind/presentation/providers/core_providers.dart';
 import 'package:medmind/presentation/providers/journal_providers.dart';

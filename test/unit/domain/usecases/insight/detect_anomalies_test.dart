@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:medmind/core/enum/enum_collection.dart';
 import 'package:medmind/core/errors/failures.dart';
-import 'package:medmind/domain/entities/symptom.dart';
 import 'package:medmind/domain/usecases/insight/detect_anomalies.dart';
 
 import '../../../../helpers/mock_repositories.dart';
