@@ -1,9 +1,11 @@
 // lib/core/di/injection.dart
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:isar/isar.dart';
 import 'package:medmind/data/datasources/local/isar_database.dart';
+import 'package:medmind/data/datasources/ml/symptom_classifier.dart';
 import 'package:medmind/platform/keystore_channel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,4 +48,8 @@ abstract class AppModule {
   @preResolve
   @lazySingleton
   Future<Isar> isar(KeystoreChannel keystore) => IsarDatabase.open(keystore);
+
+  /// ML datasources untuk ekstraksi gejala berbasis aturan.
+  @lazySingleton
+  RuleBasedSymptomExtractor get symptomExtractor => RuleBasedSymptomExtractor();
 }

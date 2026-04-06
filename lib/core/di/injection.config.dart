@@ -20,6 +20,7 @@ import 'package:medmind/data/datasources/local/journal_local_datasource.dart'
     as _i191;
 import 'package:medmind/data/datasources/local/symptom_local_datasource.dart'
     as _i308;
+import 'package:medmind/data/datasources/ml/symptom_classifier.dart' as _i881;
 import 'package:medmind/data/repositories/health_connect_repository_impl.dart'
     as _i21;
 import 'package:medmind/data/repositories/insight_repository_impl.dart'
@@ -56,21 +57,26 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.prefs,
       preResolve: true,
     );
+    gh.lazySingleton<_i881.RuleBasedSymptomExtractor>(
+      () => appModule.symptomExtractor,
+    );
     gh.lazySingleton<_i756.HealthConnectChannel>(
       () => _i756.HealthConnectChannel(),
-    );
-    gh.lazySingleton<_i783.HealthConnectRepository>(
-      () => _i21.HealthConnectRepositoryImpl(gh<_i756.HealthConnectChannel>()),
-    );
-    gh.lazySingleton<_i921.MlRepository>(() => const _i156.MlRepositoryImpl());
-    gh.lazySingleton<_i966.KeystoreChannel>(
-      () => _i966.KeystoreChannel(gh<_i558.FlutterSecureStorage>()),
     );
     gh.lazySingleton<_i153.UserPreferencesRepository>(
       () => _i634.UserPreferencesRepositoryImpl(
         gh<_i460.SharedPreferences>(),
         gh<_i558.FlutterSecureStorage>(),
       ),
+    );
+    gh.lazySingleton<_i783.HealthConnectRepository>(
+      () => _i21.HealthConnectRepositoryImpl(gh<_i756.HealthConnectChannel>()),
+    );
+    gh.lazySingleton<_i921.MlRepository>(
+      () => _i156.MlRepositoryImpl(gh<_i881.RuleBasedSymptomExtractor>()),
+    );
+    gh.lazySingleton<_i966.KeystoreChannel>(
+      () => _i966.KeystoreChannel(gh<_i558.FlutterSecureStorage>()),
     );
     await gh.lazySingletonAsync<_i338.Isar>(
       () => appModule.isar(gh<_i966.KeystoreChannel>()),

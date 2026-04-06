@@ -56,8 +56,7 @@ class HealthConnectRepositoryImpl implements HealthConnectRepository {
     final deepMinutes = session.stages
         .where((s) => s.type == 5)
         .fold<int>(0, (sum, s) => sum + s.duration.inMinutes);
-    final disturbances =
-        session.stages.where((s) => s.type == 1).length;
+    final disturbances = session.stages.where((s) => s.type == 1).length;
     final quality = totalMinutes > 0
         ? (deepMinutes / totalMinutes * 10).round().clamp(1, 10)
         : 1;
@@ -98,6 +97,11 @@ class HealthConnectRepositoryImpl implements HealthConnectRepository {
   @override
   Future<Either<Failure, void>> exportSymptomData(
     List<JournalEntry> entries,
-  ) async =>
-      const Right(null);
+  ) async {
+    // TODO: Implement export to Health Connect API
+    // For now, return placeholder
+    return const Left(
+      HealthConnectFailure('Symptom data export not yet implemented'),
+    );
+  }
 }

@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:medmind/core/enum/enum_collection.dart';
 import 'package:medmind/core/errors/exceptions.dart';
 import 'package:medmind/core/errors/failures.dart';
 import 'package:medmind/data/datasources/local/insight_cache_datasource.dart';
+import 'package:medmind/data/mappers/health_score_mapper.dart';
 import 'package:medmind/data/models/insight_model.dart';
 import 'package:medmind/domain/entities/correlation_result.dart';
 import 'package:medmind/domain/entities/health_score.dart';
@@ -100,7 +100,7 @@ class InsightRepositoryImpl implements InsightRepository {
     final key = date.toIso8601String().substring(0, 10);
     final entry = map[key] as Map<String, dynamic>?;
     if (entry == null) return const Right(null);
-    return Right(_healthScoreFromMap(entry));
+    return Right(entry.toHealthScore());
   }
 
   @override
@@ -110,18 +110,21 @@ class InsightRepositoryImpl implements InsightRepository {
         ? (jsonDecode(raw) as Map<String, dynamic>)
         : <String, dynamic>{};
     final key = score.date.toIso8601String().substring(0, 10);
-    map[key] = _healthScoreToMap(score);
+    map[key] = score.toMap();
     await _prefs.setString(_healthScoresKey, jsonEncode(map));
     return const Right(null);
   }
 
   @override
   Stream<List<Insight>> watchInsights() {
-    return _cache.watchAll().map((models) => models.map(_modelToInsight).toList());
+    return _cache.watchAll().map(
+      (models) => models.map(_modelToInsight).toList(),
+    );
   }
 
   Insight _modelToInsight(InsightModel model) {
-    final vars = (jsonDecode(model.relatedVariablesJson) as List).cast<String>();
+    final vars = (jsonDecode(model.relatedVariablesJson) as List)
+        .cast<String>();
     return Insight(
       id: model.uid,
       type: model.type,
@@ -168,20 +171,4 @@ class InsightRepositoryImpl implements InsightRepository {
         lag: m['lag'] as int,
         isSignificant: m['isSignificant'] as bool,
       );
-
-  Map<String, dynamic> _healthScoreToMap(HealthScore s) => {
-    'date': s.date.toIso8601String(),
-    'overallScore': s.overallScore,
-    'components': s.components,
-    'trend': s.trend.name,
-  };
-
-  HealthScore _healthScoreFromMap(Map<String, dynamic> m) => HealthScore(
-    date: DateTime.parse(m['date'] as String),
-    overallScore: (m['overallScore'] as num).toDouble(),
-    components: (m['components'] as Map<String, dynamic>).map(
-      (k, v) => MapEntry(k, (v as num).toDouble()),
-    ),
-    trend: ScoreTrend.values.byName(m['trend'] as String),
-  );
 }
