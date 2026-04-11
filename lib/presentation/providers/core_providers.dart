@@ -6,6 +6,10 @@ import 'package:medmind/domain/repositories/journal_repository.dart';
 import 'package:medmind/domain/repositories/ml_repository.dart';
 import 'package:medmind/domain/repositories/symptom_repository.dart';
 import 'package:medmind/domain/repositories/user_preferences_repository.dart';
+import 'package:medmind/domain/usecases/insight/detect_anomalies.dart';
+import 'package:medmind/domain/usecases/insight/generate_correlations.dart';
+import 'package:medmind/domain/usecases/insight/generate_health_score.dart';
+
 
 final journalRepositoryProvider = Provider<JournalRepository>(
   (ref) => getIt<JournalRepository>(),
@@ -30,3 +34,20 @@ final mlRepositoryProvider = Provider<MlRepository>(
 final healthConnectRepositoryProvider = Provider<HealthConnectRepository>(
   (ref) => getIt<HealthConnectRepository>(),
 );
+
+// Use Cases
+final generateCorrelationsProvider = Provider<GenerateCorrelations>(
+  (ref) => getIt<GenerateCorrelations>(),
+);
+
+final detectAnomaliesProvider = Provider<DetectAnomalies>(
+  (ref) => getIt<DetectAnomalies>(),
+);
+
+final generateHealthScoreProvider = Provider<GenerateHealthScore>(
+  (ref) => getIt<GenerateHealthScore>(),
+);
+
+final currentDateProvider = Provider<DateTime>((ref) => DateTime.now());
+
+

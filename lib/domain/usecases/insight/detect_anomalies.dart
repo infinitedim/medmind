@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import 'package:medmind/core/errors/failures.dart';
 import 'package:medmind/domain/entities/insight.dart';
 import 'package:medmind/domain/entities/journal_entry.dart';
@@ -6,6 +7,7 @@ import 'package:medmind/core/enum/enum_collection.dart';
 import 'package:medmind/domain/repositories/insight_repository.dart';
 import 'package:medmind/domain/repositories/ml_repository.dart';
 
+@lazySingleton
 class DetectAnomalies {
   final MlRepository _mlRepository;
   final InsightRepository _insightRepository;

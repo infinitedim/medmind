@@ -119,6 +119,15 @@ class JournalFormState {
   }
 }
 
+final allJournalEntriesProvider = StreamProvider<List<JournalEntry>>((ref) {
+  final repo = ref.watch(journalRepositoryProvider);
+  return repo.watchEntries();
+});
+
+
+
+
+
 final journalEntriesProvider =
     StreamProvider.family<List<JournalEntry>, (DateTime?, DateTime?)>((
       ref,
@@ -127,6 +136,7 @@ final journalEntriesProvider =
       final repo = ref.watch(journalRepositoryProvider);
       return repo.watchEntries(startDate: dates.$1, endDate: dates.$2);
     });
+
 
 final journalEntryProvider = FutureProvider.family<JournalEntry?, String>((
   ref,
@@ -302,33 +312,41 @@ final userMedicationsProvider = FutureProvider<List<Medication>>((_) async {
 });
 
 final todayJournalEntryProvider = Provider<JournalEntry?>((ref) {
-  final now = DateTime.now();
+  final now = ref.watch(currentDateProvider);
   final start = DateTime(now.year, now.month, now.day);
   final end = start.add(const Duration(days: 1));
   final list = ref.watch(journalEntriesProvider((start, end))).asData?.value;
   return list?.firstOrNull;
 });
 
+
 final journalEntriesCountProvider = Provider<int>((ref) {
-  return ref.watch(journalEntriesProvider((null, null))).asData?.value.length ??
-      0;
+  return ref.watch(allJournalEntriesProvider).asData?.value.length ?? 0;
 });
 
+
 final journalStreakProvider = Provider<int>((ref) {
-  final entries = ref.watch(journalEntriesProvider((null, null))).asData?.value;
-  if (entries == null || entries.isEmpty) return 0;
+  final entriesState = ref.watch(allJournalEntriesProvider);
+  final entries = entriesState.asData?.value;
+  if (entries == null || entries.isEmpty) {
+    return 0;
+  }
+
   final dates =
       entries
           .map((e) => DateTime(e.date.year, e.date.month, e.date.day))
           .toSet()
           .toList()
         ..sort((a, b) => b.compareTo(a));
-  final today = DateTime.now();
+
+  final today = ref.watch(currentDateProvider);
   final todayDate = DateTime(today.year, today.month, today.day);
-  if (dates.first != todayDate &&
-      dates.first != todayDate.subtract(const Duration(days: 1))) {
+
+  // If most recent entry is older than yesterday, streak is broken
+  if (dates.first.isBefore(todayDate.subtract(const Duration(days: 1)))) {
     return 0;
   }
+
   int streak = 1;
   for (int i = 1; i < dates.length; i++) {
     if (dates[i] == dates[i - 1].subtract(const Duration(days: 1))) {
@@ -339,3 +357,5 @@ final journalStreakProvider = Provider<int>((ref) {
   }
   return streak;
 });
+
+

@@ -1,7 +1,10 @@
 // test/unit/presentation/providers/journal_form_notifier_test.dart
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:medmind/domain/entities/journal_entry.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:medmind/core/enum/enum_collection.dart';
 import 'package:medmind/core/errors/failures.dart';
@@ -23,7 +26,10 @@ void main() {
 
   ProviderContainer makeContainer({String? entryId}) {
     return ProviderContainer(
-      overrides: [journalRepositoryProvider.overrideWithValue(mockRepo)],
+      overrides: [
+        journalRepositoryProvider.overrideWithValue(mockRepo),
+        currentDateProvider.overrideWithValue(kNow),
+      ],
     );
   }
 
@@ -320,69 +326,95 @@ void main() {
 
   group('journalStreakProvider', () {
     test('returns 0 when entry list is empty', () async {
-      when(
-        () => mockRepo.watchEntries(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-        ),
-      ).thenAnswer((_) => Stream.value([]));
+      when(() => mockRepo.watchEntries()).thenAnswer((_) => Stream.value([]));
 
       final container = ProviderContainer(
-        overrides: [journalRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [
+          journalRepositoryProvider.overrideWithValue(mockRepo),
+          currentDateProvider.overrideWithValue(kNow),
+        ],
       );
+
       addTearDown(container.dispose);
 
-      await container.read(journalEntriesProvider((null, null)).future);
+      await flushProvider(container, allJournalEntriesProvider);
+
       expect(container.read(journalStreakProvider), 0);
     });
 
     test('returns 1 for today only', () async {
-      final now = DateTime.now();
+      final now = kNow;
       final today = DateTime(now.year, now.month, now.day);
       final entries = [makeMinimalEntry(date: today)];
+
+      final controller = StreamController<List<JournalEntry>>(sync: true);
       when(
         () => mockRepo.watchEntries(
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
-      ).thenAnswer((_) => Stream.value(entries));
+      ).thenAnswer((_) => controller.stream);
 
       final container = ProviderContainer(
-        overrides: [journalRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [
+          journalRepositoryProvider.overrideWithValue(mockRepo),
+          currentDateProvider.overrideWithValue(now),
+        ],
       );
       addTearDown(container.dispose);
+      addTearDown(controller.close);
 
-      await container.read(journalEntriesProvider((null, null)).future);
-      expect(container.read(journalStreakProvider), 1);
+      // We need to listen to the provider BEFORE adding data to the controller
+      // so that it can catch the emission.
+      container.listen(
+        allJournalEntriesProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+
+      controller.add(entries);
+      await flushProvider(container, allJournalEntriesProvider);
+
+      final streak = container.read(journalStreakProvider);
+      expect(streak, 1);
     });
 
     test('returns 1 for yesterday only (no entry today)', () async {
-      final now = DateTime.now();
-      final yesterday = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(const Duration(days: 1));
+      final now = kNow;
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
       final entries = [makeMinimalEntry(date: yesterday)];
+
+      final controller = StreamController<List<JournalEntry>>(sync: true);
       when(
         () => mockRepo.watchEntries(
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
-      ).thenAnswer((_) => Stream.value(entries));
+      ).thenAnswer((_) => controller.stream);
 
       final container = ProviderContainer(
-        overrides: [journalRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [
+          journalRepositoryProvider.overrideWithValue(mockRepo),
+          currentDateProvider.overrideWithValue(now),
+        ],
       );
       addTearDown(container.dispose);
+      addTearDown(controller.close);
 
-      await container.read(journalEntriesProvider((null, null)).future);
-      expect(container.read(journalStreakProvider), 1);
+      container.listen(
+        allJournalEntriesProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      controller.add(entries);
+      await flushProvider(container, allJournalEntriesProvider);
+
+      final streak = container.read(journalStreakProvider);
+      expect(streak, 1);
     });
 
     test('counts consecutive days from today', () async {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
+      final today = DateTime(kNow.year, kNow.month, kNow.day);
       final entries = List.generate(
         5,
         (i) => makeMinimalEntry(
@@ -390,25 +422,37 @@ void main() {
           date: today.subtract(Duration(days: i)),
         ),
       );
+      final controller = StreamController<List<JournalEntry>>(sync: true);
       when(
         () => mockRepo.watchEntries(
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
-      ).thenAnswer((_) => Stream.value(entries));
+      ).thenAnswer((_) => controller.stream);
 
       final container = ProviderContainer(
-        overrides: [journalRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [
+          journalRepositoryProvider.overrideWithValue(mockRepo),
+          currentDateProvider.overrideWithValue(kNow),
+        ],
       );
-      addTearDown(container.dispose);
 
-      await container.read(journalEntriesProvider((null, null)).future);
+      addTearDown(container.dispose);
+      addTearDown(controller.close);
+
+      container.listen(
+        allJournalEntriesProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      controller.add(entries);
+      await flushProvider(container, allJournalEntriesProvider);
+
       expect(container.read(journalStreakProvider), 5);
     });
 
     test('streak breaks when there is a gap', () async {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
+      final today = DateTime(kNow.year, kNow.month, kNow.day);
       // today, day-1, gap (no day-2), day-3
       final entries = [
         makeMinimalEntry(id: 'e0', date: today),
@@ -421,46 +465,126 @@ void main() {
           date: today.subtract(const Duration(days: 3)),
         ),
       ];
+      final controller = StreamController<List<JournalEntry>>(sync: true);
       when(
         () => mockRepo.watchEntries(
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
-      ).thenAnswer((_) => Stream.value(entries));
+      ).thenAnswer((_) => controller.stream);
 
       final container = ProviderContainer(
-        overrides: [journalRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [
+          journalRepositoryProvider.overrideWithValue(mockRepo),
+          currentDateProvider.overrideWithValue(kNow),
+        ],
       );
-      addTearDown(container.dispose);
 
-      await container.read(journalEntriesProvider((null, null)).future);
+      addTearDown(container.dispose);
+      addTearDown(controller.close);
+
+      container.listen(
+        allJournalEntriesProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      controller.add(entries);
+      await flushProvider(container, allJournalEntriesProvider);
+
       expect(container.read(journalStreakProvider), 2);
     });
 
     test('returns 0 when most recent entry is 2+ days ago', () async {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final entries = List.generate(
-        5,
-        (i) => makeMinimalEntry(
-          id: 'e$i',
-          date: today.subtract(Duration(days: i + 2)),
+      final today = DateTime(kNow.year, kNow.month, kNow.day);
+      // Entry from 2 days ago
+      final entries = [
+        makeMinimalEntry(
+          id: 'e1',
+          date: today.subtract(const Duration(days: 2)),
         ),
-      );
+      ];
+      final controller = StreamController<List<JournalEntry>>(sync: true);
       when(
         () => mockRepo.watchEntries(
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
-      ).thenAnswer((_) => Stream.value(entries));
+      ).thenAnswer((_) => controller.stream);
 
       final container = ProviderContainer(
-        overrides: [journalRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [
+          journalRepositoryProvider.overrideWithValue(mockRepo),
+          currentDateProvider.overrideWithValue(kNow),
+        ],
       );
-      addTearDown(container.dispose);
 
-      await container.read(journalEntriesProvider((null, null)).future);
+      addTearDown(container.dispose);
+      addTearDown(controller.close);
+
+      container.listen(
+        allJournalEntriesProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      controller.add(entries);
+      await flushProvider(container, allJournalEntriesProvider);
+
       expect(container.read(journalStreakProvider), 0);
     });
+
+    test('returns 2 for today and yesterday', () async {
+      final now = kNow;
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+      final entries = [
+        makeMinimalEntry(id: '1', date: today),
+        makeMinimalEntry(id: '2', date: yesterday),
+      ];
+
+      final controller = StreamController<List<JournalEntry>>(sync: true);
+      when(
+        () => mockRepo.watchEntries(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) => controller.stream);
+
+      final container = ProviderContainer(
+        overrides: [
+          journalRepositoryProvider.overrideWithValue(mockRepo),
+          currentDateProvider.overrideWithValue(now),
+        ],
+      );
+      addTearDown(container.dispose);
+      addTearDown(controller.close);
+
+      container.listen(
+        allJournalEntriesProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      controller.add(entries);
+      await flushProvider(container, allJournalEntriesProvider);
+
+      final streak = container.read(journalStreakProvider);
+      expect(streak, 2);
+    });
   });
+}
+
+/// Helper to wait for a provider to resolve its initial state in tests
+Future<void> flushProvider(
+  ProviderContainer container,
+  dynamic provider,
+) async {
+  // Read once to initialize
+  container.read(provider);
+  // Wait for microtasks
+  await Future.microtask(() {});
+  // Polling loop for safety in case of deep async dependencies
+  for (int i = 0; i < 20; i++) {
+    final state = container.read(provider);
+    if (state is! AsyncValue || !state.isLoading) return;
+    await Future.delayed(const Duration(milliseconds: 5));
+  }
 }

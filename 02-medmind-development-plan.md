@@ -3,22 +3,22 @@
 > Dokumen ini adalah panduan langkah-demi-langkah untuk membangun MedMind dari nol sampai siap rilis di Play Store.
 > Ditulis untuk developer yang akan mengerjakan sendiri (solo dev).
 >
-> **Terakhir diperbarui:** 14 Maret 2026
+> **Terakhir diperbarui:** 12 April 2026
 > **Flutter SDK target:** 3.41.4 stable (Dart 3.7.x) — semua package versions, API, dan CI config di dokumen ini mengacu pada versi ini.
-> **Status Keseluruhan:** ~40% complete — Domain layer 100%, Data layer ~65% (foundation selesai, 6 repository implementations kosong), Presentation layer ~5% (routing/theming/shell selesai, semua page stub), Insight Engine 0%, ML Integration 0%, Testing ~15% (14 test files ada, unit tests jalan, widget tests basic).
+> **Status Keseluruhan:** ~75% complete — Domain layer 100%, Data layer ~85% (foundation dan semua repository implementations selesai), Presentation layer ~60% (core pages dan providers utama selesai), Insight Engine 0%, ML Integration 0%, Testing ~40% (33 test files ada, unit + widget tests bertambah).
 >
 > **Breakdown per layer:**
 > | Layer | Progress | Detail |
 > |-------|----------|--------|
 > | Domain | 100% ✅ | 8 entities (Freezed), 6 repo interfaces, 16 use cases, 6 enums, failures, exceptions |
-> | Data (Models/Sources) | 100% ✅ | Isar DB + AES-256-GCM, 4 @Collection + schemas, 3 datasources (511 LOC), 2 mappers |
-> | Data (Repo Impls) | 0% ❌ | Semua 6 file kosong — **BLOCKER UTAMA** |
+> | Data (Models/Sources) | 100% ✅ | Isar DB + AES-256-GCM, 4 @Collection + schemas, 6 functional datasources, mappers |
+> | Data (Repo Impls) | 100% ✅ | Semua 6 repository implementations selesai dikerjakan |
 > | Presentation (Shell) | 100% ✅ | GoRouter, bottom nav, theme (360 LOC), typography, color tokens |
-> | Presentation (Pages) | ~5% 🟡 | Hanya onboarding welcome selesai, sisanya stub |
-> | Presentation (Providers) | 0% ❌ | Folder kosong, Riverpod belum dipakai |
+> | Presentation (Pages) | ~60% 🟡 | Home, Journal (List/Entry), Insights (Stub), Settings, Export pages selesai |
+> | Presentation (Providers) | ~50% 🟡 | Auth, Journal, Symptom, Preference providers selesai |
 > | Platform Channels | 100% ✅ | HealthConnectChannel (243 LOC), KeystoreChannel (193 LOC) |
-> | Testing | ~15% 🟡 | 14 test files, 6 unit + 4 widget + 2 integration (smoke) |
-> | DI Container | 95% 🟡 | Terkonfigurasi tapi `configureDependencies()` **belum dipanggil** di `main.dart` — BUG |
+> | Testing | ~40% 🟡 | 33 test files, unit + widget tests mencakup core logic |
+> | DI Container | 100% ✅ | Terkonfigurasi dan `configureDependencies()` sudah dipanggil di `main.dart` |
 > | Insight Engine | 0% ❌ | `insight_engine.dart` kosong |
 > | ML Integration | 0% ❌ | Semua file kosong, model `.tflite` 0 bytes |
 
@@ -27,9 +27,9 @@
 ## Daftar Isi
 
 1. [Gambaran Arsitektur & Struktur Folder](#1-gambaran-arsitektur--struktur-folder)
-2. [Phase 1: Foundation (Minggu 1–2)](#phase-1-foundation-minggu-12) — 🟡 ~80% selesai
-3. [Phase 2: Smart Journaling (Minggu 3–4)](#phase-2-smart-journaling-minggu-34) — ❌ Belum dimulai
-4. [Phase 3: Statistical Engine (Minggu 5–6)](#phase-3-statistical-engine-minggu-56) — ❌ Belum dimulai
+2. [Phase 1: Foundation (Minggu 1–2)](#phase-1-foundation-minggu-12) — ✅ 100% Selesai
+3. [Phase 2: Smart Journaling (Minggu 3–4)](#phase-2-smart-journaling-minggu-34) — ✅ 100% Selesai
+4. [Phase 3: Statistical Engine (Minggu 5–6)](#phase-3-statistical-engine-minggu-56) — 🟡 Sedang dikerjakan
 5. [Phase 4: ML Integration (Minggu 7–9)](#phase-4-ml-integration-minggu-79) — ❌ Belum dimulai
 6. [Phase 5: Visualization & Polish (Minggu 10–11)](#phase-5-visualization--polish-minggu-1011) — ❌ Belum dimulai
 7. [Phase 6: Production (Minggu 12)](#phase-6-production-minggu-12) — ❌ Belum dimulai

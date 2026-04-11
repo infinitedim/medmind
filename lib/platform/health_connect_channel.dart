@@ -111,6 +111,10 @@ class HealthConnectChannel {
   ///
   /// Each [HeartRateSample] has a [bpm] value and the exact [time] it was
   /// recorded. Useful for computing resting / average heart rate per day.
+  /// Returns all heart-rate samples in [startTime]–[endTime].
+  ///
+  /// Each [HeartRateSample] has a [bpm] value and the exact [time] it was
+  /// recorded. Useful for computing resting / average heart rate per day.
   Future<List<HeartRateSample>> readHeartRate({
     required DateTime startTime,
     required DateTime endTime,
@@ -129,7 +133,22 @@ class HealthConnectChannel {
       throw HealthConnectException(e.code, e.message ?? 'readHeartRate failed');
     }
   }
+
+  /// Writes symptom data to Health Connect.
+  ///
+  /// Note: This is an invasive operation. Ensure permissions are granted.
+  Future<void> writeSymptoms(List<Map<String, dynamic>> symptoms) async {
+    try {
+      await _channel.invokeMethod('writeSymptoms', {
+        'symptoms': symptoms,
+      });
+    } on PlatformException catch (e) {
+      throw HealthConnectException(e.code, e.message ?? 'writeSymptoms failed');
+    }
+  }
 }
+
+
 
 // ---------------------------------------------------------------------------
 // DTOs — transport-layer data models

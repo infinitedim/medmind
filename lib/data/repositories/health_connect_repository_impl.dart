@@ -98,10 +98,24 @@ class HealthConnectRepositoryImpl implements HealthConnectRepository {
   Future<Either<Failure, void>> exportSymptomData(
     List<JournalEntry> entries,
   ) async {
-    // TODO: Implement export to Health Connect API
-    // For now, return placeholder
-    return const Left(
-      HealthConnectFailure('Symptom data export not yet implemented'),
-    );
+    try {
+      final symptoms = entries.expand((e) {
+        return e.symptoms.map((s) => {
+          'id': s.symptomId,
+          'severity': s.severity,
+          'timestamp': e.date.toUtc().toIso8601String(),
+        });
+      }).toList();
+
+      if (symptoms.isEmpty) return const Right(null);
+
+      await _channel.writeSymptoms(symptoms);
+      return const Right(null);
+    } on HealthConnectException catch (e) {
+      return Left(HealthConnectFailure(e.message));
+    } catch (e) {
+      return Left(HealthConnectFailure('Export failed: ${e.toString()}'));
+    }
   }
 }
+

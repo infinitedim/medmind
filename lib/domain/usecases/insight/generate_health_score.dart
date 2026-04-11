@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import 'package:medmind/core/errors/failures.dart';
 import 'package:medmind/core/enum/enum_collection.dart';
 import 'package:medmind/domain/entities/health_score.dart';
@@ -12,6 +13,7 @@ class GenerateHealthScoreParams {
   const GenerateHealthScoreParams({required this.date});
 }
 
+@lazySingleton
 class GenerateHealthScore {
   final JournalRepository _journalRepository;
   final InsightRepository _insightRepository;

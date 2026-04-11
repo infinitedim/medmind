@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import 'package:medmind/core/errors/failures.dart';
 import 'package:medmind/domain/entities/correlation_result.dart';
 import 'package:medmind/domain/entities/journal_entry.dart';
@@ -16,6 +17,7 @@ class GenerateCorrelationsParams {
   });
 }
 
+@lazySingleton
 class GenerateCorrelations {
   final JournalRepository _journalRepository;
   final MlRepository _mlRepository;

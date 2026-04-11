@@ -40,6 +40,12 @@ import 'package:medmind/domain/repositories/ml_repository.dart' as _i921;
 import 'package:medmind/domain/repositories/symptom_repository.dart' as _i201;
 import 'package:medmind/domain/repositories/user_preferences_repository.dart'
     as _i153;
+import 'package:medmind/domain/services/insight_engine.dart' as _i728;
+import 'package:medmind/domain/usecases/insight/detect_anomalies.dart' as _i317;
+import 'package:medmind/domain/usecases/insight/generate_correlations.dart'
+    as _i960;
+import 'package:medmind/domain/usecases/insight/generate_health_score.dart'
+    as _i458;
 import 'package:medmind/platform/health_connect_channel.dart' as _i756;
 import 'package:medmind/platform/keystore_channel.dart' as _i966;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
@@ -104,6 +110,33 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i758.SymptomRepositoryImpl(
         gh<_i308.SymptomLocalDataSource>(),
         gh<_i460.SharedPreferences>(),
+      ),
+    );
+    gh.lazySingleton<_i317.DetectAnomalies>(
+      () => _i317.DetectAnomalies(
+        gh<_i921.MlRepository>(),
+        gh<_i271.InsightRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i960.GenerateCorrelations>(
+      () => _i960.GenerateCorrelations(
+        gh<_i466.JournalRepository>(),
+        gh<_i921.MlRepository>(),
+        gh<_i271.InsightRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i458.GenerateHealthScore>(
+      () => _i458.GenerateHealthScore(
+        gh<_i466.JournalRepository>(),
+        gh<_i271.InsightRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i728.InsightEngine>(
+      () => _i728.InsightEngine(
+        gh<_i960.GenerateCorrelations>(),
+        gh<_i317.DetectAnomalies>(),
+        gh<_i458.GenerateHealthScore>(),
+        gh<_i466.JournalRepository>(),
       ),
     );
     return this;
