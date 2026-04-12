@@ -52,3 +52,6 @@ tqdm==4.67.3
 # Format biner FlatBuffers — digunakan oleh TFLite untuk serialisasi model
 # (.tflite files), memastikan model yang dihasilkan dapat dibaca tflite_flutter
 flatbuffers==25.12.19
+
+# Load dataset dari HuggingFace langsung (wajib)
+datasets>=3.0.0

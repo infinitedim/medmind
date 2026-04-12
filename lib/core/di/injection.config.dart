@@ -20,6 +20,8 @@ import 'package:medmind/data/datasources/local/journal_local_datasource.dart'
     as _i191;
 import 'package:medmind/data/datasources/local/symptom_local_datasource.dart'
     as _i308;
+import 'package:medmind/data/datasources/ml/anomaly_model.dart' as _i975;
+import 'package:medmind/data/datasources/ml/correlation_model.dart' as _i336;
 import 'package:medmind/data/datasources/ml/symptom_classifier.dart' as _i881;
 import 'package:medmind/data/repositories/health_connect_repository_impl.dart'
     as _i21;
@@ -66,6 +68,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i881.RuleBasedSymptomExtractor>(
       () => appModule.symptomExtractor,
     );
+    gh.lazySingleton<_i975.AnomalyTFLiteModel>(
+      () => _i975.AnomalyTFLiteModel(),
+    );
+    gh.lazySingleton<_i336.CorrelationTFLiteModel>(
+      () => _i336.CorrelationTFLiteModel(),
+    );
     gh.lazySingleton<_i756.HealthConnectChannel>(
       () => _i756.HealthConnectChannel(),
     );
@@ -79,7 +87,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i21.HealthConnectRepositoryImpl(gh<_i756.HealthConnectChannel>()),
     );
     gh.lazySingleton<_i921.MlRepository>(
-      () => _i156.MlRepositoryImpl(gh<_i881.RuleBasedSymptomExtractor>()),
+      () => _i156.MlRepositoryImpl(
+        gh<_i881.RuleBasedSymptomExtractor>(),
+        gh<_i975.AnomalyTFLiteModel>(),
+        gh<_i336.CorrelationTFLiteModel>(),
+      ),
     );
     gh.lazySingleton<_i966.KeystoreChannel>(
       () => _i966.KeystoreChannel(gh<_i558.FlutterSecureStorage>()),
